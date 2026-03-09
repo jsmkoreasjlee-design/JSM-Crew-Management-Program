@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSM Crew Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{fontFamily:"IBM Plex Sans",sans-serif;background:#0a0e1a;min-height:100vh;color:#e8eaf0;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:#12182b;}
+  ::-webkit-scrollbar-thumb{background:#2a3350;border-radius:3px;}
+  input,select,textarea{outline:none;font-family:inherit;}
+  button{cursor:pointer;font-family:inherit;}
+  .nav-btn{background:none;border:none;padding:10px 20px;color:#8892b0;font-size:13px;font-weight:500;letter-spacing:0.05em;transition:all 0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
+  .nav-btn.active{color:#64ffda;border-bottom:2px solid #64ffda;}
+  .nav-btn:hover{color:#ccd6f6;}
+  .card{background:#111827;border:1px solid #1e2a42;border-radius:8px;padding:20px;}
+  .stat-card{background:#111827;border:1px solid #1e2a42;border-radius:8px;padding:18px 22px;flex:1;}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.05em;}
+  .btn-primary{background:#0d7377;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:500;transition:all 0.2s;}
+  .btn-primary:hover{background:#14a085;}
+  .btn-ghost{background:transparent;color:#8892b0;border:1px solid #1e2a42;padding:7px 16px;border-radius:6px;font-size:13px;transition:all 0.2s;}
+  .btn-ghost:hover{border-color:#64ffda;color:#64ffda;}
+  .btn-ghost-sm{background:transparent;color:#8892b0;border:1px solid #1e2a42;padding:4px 10px;border-radius:6px;font-size:11px;transition:all 0.2s;}
+  .btn-ghost-sm:hover{border-color:#64ffda;color:#64ffda;}
+  .row-hover:hover{background:#161f33;}
+  .input-field{background:#0d1220;border:1px solid #1e2a42;border-radius:6px;padding:8px 12px;color:#e8eaf0;font-size:13px;width:100%;}
+  .input-field:focus{border-color:#64ffda;}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+  .panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:100;display:flex;justify-content:flex-end;}
+  .side-panel{background:#0f1525;border-left:1px solid #1e2a42;width:480px;height:100%;overflow-y:auto;padding:30px;animation:slideIn 0.25s ease;}
+  @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+  .score-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+  .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;}
+  .modal{background:#111827;border:1px solid #1e2a42;border-radius:12px;padding:30px;width:600px;max-height:80vh;overflow-y:auto;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .section-title{font-size:11px;font-weight:600;letter-spacing:0.12em;color:#4a5568;text-transform:uppercase;margin-bottom:14px;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .hidden{display:none!important;}
+  #app{display:flex;flex-direction:column;min-height:100vh;font-family:'IBM Plex Sans','Noto Sans KR',sans-serif;}
+  .header{background:#0a0e1a;border-bottom:1px solid #1e2a42;padding:0 24px;display:flex;align-items:center;gap:24px;position:sticky;top:0;z-index:50;}
+  .logo-area{display:flex;align-items:center;gap:10px;padding:14px 0;border-right:1px solid #1e2a42;padding-right:24px;min-width:200px;}
+  .logo-box{width:32px;height:32px;background:linear-gradient(135deg,#0d7377,#14a085);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;font-family:'IBM Plex Mono',monospace;}
+  .content{flex:1;padding:24px;max-width:1400px;width:100%;margin:0 auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:#4a5568;letter-spacing:0.08em;white-space:nowrap;background:#0d1220;border-bottom:1px solid #1e2a42;}
+  td{padding:12px 16px;border-bottom:1px solid #1a2235;}
+  .stat-grid{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-box">JSM</div>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#ccd6f6;letter-spacing:0.05em;">JSM International</div>
+        <div style="font-size:10px;color:#4a5568;letter-spacing:0.08em;">CREW MANAGEMENT SYSTEM</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:2px;overflow-x:auto;">
+      <button class="nav-btn active" onclick="switchTab('dashboard')">대시보드</button>
+      <button class="nav-btn" onclick="switchTab('crew')">선원관리</button>
+      <button class="nav-btn" onclick="switchTab('certificates')">자격증관리</button>
+      <button class="nav-btn" onclick="switchTab('payroll')">급여관리</button>
+      <button class="nav-btn" onclick="switchTab('evaluation')">고과관리</button>
+    </nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#00d4aa;box-shadow:0 0 6px #00d4aa;"></div>
+      <span style="font-size:12px;color:#4a5568;">Admin</span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div id="tab-dashboard"></div>
+    <div id="tab-crew" class="hidden"></div>
+    <div id="tab-certificates" class="hidden"></div>
+    <div id="tab-payroll" class="hidden"></div>
+    <div id="tab-evaluation" class="hidden"></div>
+  </div>
+</div>
+
+<!-- Side Panel -->
+<div id="side-panel-overlay" class="panel-overlay hidden" onclick="closePanel()">
+  <div class="side-panel" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <div>
+        <div id="panel-name" style="font-size:18px;font-weight:700;color:#ccd6f6;"></div>
+        <div id="panel-sub" style="font-size:12px;color:#4a5568;margin-top:2px;"></div>
+      </div>
+      <button style="background:none;border:none;color:#4a5568;font-size:20px;cursor:pointer;" onclick="closePanel()">✕</button>
+    </div>
+    <div id="panel-content"></div>
+  </div>
+</div>
+
+<!-- Add Crew Modal -->
+<div id="add-crew-modal" class="modal-overlay hidden" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h2 style="font-size:18px;font-weight:700;color:#ccd6f6;">신규 선원 등록</h2>
+      <button style="background:none;border:none;color:#4a5568;font-size:20px;cursor:pointer;" onclick="closeModal()">✕</button>
+    </div>
+    <div class="section-title">기본 정보</div>
+    <div class="grid2" style="margin-bottom:20px;">
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">이름</div><input class="input-field" id="new-name" type="text"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">국적</div>
+        <select class="input-field" id="new-nationality">
+          <option value="Myanmar">Myanmar</option>
+          <option value="Indonesia">Indonesia</option>
+        </select>
+      </div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">직책</div>
+        <select class="input-field" id="new-rank">
+          <option value="">선택...</option>
+          <option>Master</option><option>Chief Officer</option><option>2nd Officer</option><option>3rd Officer</option>
+          <option>Chief Engineer</option><option>2nd Engineer</option><option>3rd Engineer</option><option>4th Engineer</option>
+          <option>Bosun</option><option>AB</option><option>OS</option><option>Oiler</option><option>Wiper</option><option>Cook</option><option>Steward</option>
+        </select>
+      </div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">선박</div><input class="input-field" id="new-vessel" type="text"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">선사</div>
+        <select class="input-field" id="new-shipowner">
+          <option value="">선택...</option>
+          <option>Korea Shipping Co.</option><option>Busan Marine Ltd.</option><option>Sejong Shipping</option>
+          <option>HMM</option><option>Pan Ocean</option><option>SK Shipping</option>
+        </select>
+      </div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">상태</div>
+        <select class="input-field" id="new-status">
+          <option value="onboard">승선중</option>
+          <option value="leave">휴가중</option>
+        </select>
+      </div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">생년월일</div><input class="input-field" id="new-birthDate" type="date"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">여권번호</div><input class="input-field" id="new-passportNo" type="text"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">여권만료</div><input class="input-field" id="new-passportExpiry" type="date"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">선원수첩</div><input class="input-field" id="new-seamanBook" type="text"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">승선일</div><input class="input-field" id="new-joinDate" type="date"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">하선예정</div><input class="input-field" id="new-signOffDate" type="date"></div>
+    </div>
+    <div class="section-title">급여 정보 (USD)</div>
+    <div class="grid2" style="margin-bottom:24px;">
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">기본급</div><input class="input-field" id="new-baseSalary" type="number" value="0"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">OT 단가</div><input class="input-field" id="new-overtimeRate" type="number" value="0"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">수당</div><input class="input-field" id="new-allowances" type="number" value="0"></div>
+      <div><div style="font-size:11px;color:#4a5568;margin-bottom:5px;">공제</div><input class="input-field" id="new-deductions" type="number" value="0"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn-ghost" onclick="closeModal()">취소</button>
+      <button class="btn-primary" onclick="addCrew()">등록</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+let crew = [
+  { id:1, crewNo:"MM-0001", name:"Kyaw Zin Oo", nationality:"Myanmar", rank:"Master", vessel:"MV Golden Star", shipowner:"Korea Shipping Co.", status:"onboard", birthDate:"1978-03-15", passportNo:"MA123456", passportExpiry:"2027-06-30", seamanBook:"MMR-20145", joinDate:"2024-01-10", signOffDate:"2024-07-10", baseSalary:4200, overtimeRate:15.5, allowances:300, deductions:200 },
+  { id:2, crewNo:"MM-0002", name:"Aung Myo Thant", nationality:"Myanmar", rank:"Chief Officer", vessel:"MV Golden Star", shipowner:"Korea Shipping Co.", status:"onboard", birthDate:"1982-07-22", passportNo:"MA234567", passportExpiry:"2026-03-15", seamanBook:"MMR-20289", joinDate:"2024-02-05", signOffDate:"2024-08-05", baseSalary:3200, overtimeRate:12.0, allowances:250, deductions:180 },
+  { id:3, crewNo:"MM-0003", name:"Zaw Lin Htun", nationality:"Myanmar", rank:"2nd Officer", vessel:"MV Pacific Rose", shipowner:"Busan Marine Ltd.", status:"leave", birthDate:"1990-11-08", passportNo:"MA345678", passportExpiry:"2028-11-20", seamanBook:"MMR-20401", joinDate:"2023-11-01", signOffDate:"2024-05-01", baseSalary:2400, overtimeRate:10.0, allowances:200, deductions:150 },
+  { id:4, crewNo:"ID-0001", name:"Budi Santoso", nationality:"Indonesia", rank:"Chief Engineer", vessel:"MV Pacific Rose", shipowner:"Busan Marine Ltd.", status:"onboard", birthDate:"1975-05-30", passportNo:"A1234567", passportExpiry:"2025-12-01", seamanBook:"IDN-10023", joinDate:"2024-03-01", signOffDate:"2024-09-01", baseSalary:3800, overtimeRate:14.0, allowances:280, deductions:190 },
+  { id:5, crewNo:"ID-0002", name:"Eko Prasetyo", nationality:"Indonesia", rank:"2nd Engineer", vessel:"MV Horizon Ace", shipowner:"Sejong Shipping", status:"onboard", birthDate:"1988-09-14", passportNo:"B9876543", passportExpiry:"2027-04-10", seamanBook:"IDN-10187", joinDate:"2024-01-20", signOffDate:"2024-07-20", baseSalary:2800, overtimeRate:11.0, allowances:220, deductions:160 },
+  { id:6, crewNo:"MM-0004", name:"Htet Myat Aung", nationality:"Myanmar", rank:"Bosun", vessel:"MV Horizon Ace", shipowner:"Sejong Shipping", status:"leave", birthDate:"1993-02-18", passportNo:"MA456789", passportExpiry:"2026-08-25", seamanBook:"MMR-20563", joinDate:"2023-09-15", signOffDate:"2024-03-15", baseSalary:1600, overtimeRate:8.0, allowances:150, deductions:100 },
+];
+
+let certs = [
+  { id:1, crewId:1, type:"STCW Basic Safety", certNo:"BS-2021-0045", issueDate:"2021-03-10", expiryDate:"2026-03-10", issuedBy:"Myanmar Port Authority", status:"valid" },
+  { id:2, crewId:1, type:"GMDSS GOC", certNo:"GOC-2019-0123", issueDate:"2019-06-15", expiryDate:"2024-06-15", issuedBy:"Myanmar Port Authority", status:"expired" },
+  { id:3, crewId:1, type:"Master CoC", certNo:"MCC-2020-0067", issueDate:"2020-01-20", expiryDate:"2025-01-20", issuedBy:"Myanmar DMA", status:"expiring" },
+  { id:4, crewId:2, type:"STCW Basic Safety", certNo:"BS-2022-0189", issueDate:"2022-05-01", expiryDate:"2027-05-01", issuedBy:"Myanmar Port Authority", status:"valid" },
+  { id:5, crewId:4, type:"STCW Basic Safety", certNo:"BS-IDN-0234", issueDate:"2021-08-20", expiryDate:"2026-08-20", issuedBy:"DEPHUB Indonesia", status:"valid" },
+  { id:6, crewId:4, type:"Chief Engineer CoC", certNo:"CE-IDN-0089", issueDate:"2019-11-05", expiryDate:"2024-11-05", issuedBy:"DEPHUB Indonesia", status:"expiring" },
+];
+
+const evals = [
+  { id:1, crewId:1, period:"2023 H2", evaluator:"Capt. Kim Sung-ho", seamanship:5, leadership:5, communication:4, safety:5, teamwork:5, overall:5, comment:"Outstanding performance. Highly recommended for re-hire.", reHire:true },
+  { id:2, crewId:2, period:"2023 H2", evaluator:"Capt. Kim Sung-ho", seamanship:4, leadership:4, communication:4, safety:4, teamwork:5, overall:4, comment:"Good officer. Reliable and professional.", reHire:true },
+  { id:3, crewId:4, period:"2023 H2", evaluator:"Chief Eng. Park", seamanship:5, leadership:4, communication:3, safety:5, teamwork:4, overall:4, comment:"Excellent engineer. Language barrier minor issue.", reHire:true },
+];
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let currentTab = "dashboard";
+let payMonth = 2;
+let searchTerm = "";
+let filterNat = "all";
+let filterStatus = "all";
+let selectedCrew = null;
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+function daysUntil(dateStr) {
+  return Math.ceil((new Date(dateStr) - new Date()) / (1000*60*60*24));
+}
+function certStatus(expiry) {
+  const d = daysUntil(expiry);
+  if (d < 0) return "expired";
+  if (d < 90) return "expiring";
+  return "valid";
+}
+const statusColor = { onboard:"#00d4aa", leave:"#f0a500", expired:"#ff4d6d", expiring:"#f0a500", valid:"#00d4aa" };
+const statusLabel = { onboard:"승선중", leave:"휴가중", expired:"만료", expiring:"만료임박", valid:"유효" };
+function rankShort(r) { return r ? r.split(" ").map(w=>w[0]).join("") : "??"; }
+function calcPay(c) {
+  const ot = c.overtimeRate * 208;
+  return { base:c.baseSalary, ot:Math.round(ot), allowances:c.allowances, deductions:c.deductions, net:Math.round(c.baseSalary+ot+c.allowances-c.deductions) };
+}
+function filteredCrew() {
+  return crew.filter(c => {
+    const matchSearch = !searchTerm || c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.crewNo.toLowerCase().includes(searchTerm.toLowerCase()) || c.vessel.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchNat = filterNat === "all" || c.nationality === filterNat;
+    const matchStatus = filterStatus === "all" || c.status === filterStatus;
+    return matchSearch && matchNat && matchStatus;
+  });
+}
+
+// ─── Tab Switch ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+    const tabs = ['dashboard','crew','certificates','payroll','evaluation'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  if (tab === 'dashboard') renderDashboard();
+  else if (tab === 'crew') renderCrew();
+  else if (tab === 'certificates') renderCertificates();
+  else if (tab === 'payroll') renderPayroll();
+  else if (tab === 'evaluation') renderEvaluation();
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const expiringSoon = certs.filter(c => certStatus(c.expiryDate) !== "valid");
+  const onboardCount = crew.filter(c => c.status === "onboard").length;
+  const leaveCount = crew.filter(c => c.status === "leave").length;
+  const mmCount = crew.filter(c => c.nationality === "Myanmar").length;
+  const idCount = crew.filter(c => c.nationality === "Indonesia").length;
+
+  const stats = [
+    { label:"전체 선원", value:crew.length, sub:"명", color:"#64ffda" },
+    { label:"승선중", value:onboardCount, sub:"명", color:"#00d4aa" },
+    { label:"휴가중", value:leaveCount, sub:"명", color:"#f0a500" },
+    { label:"미얀마", value:mmCount, sub:"명", color:"#7eb8f7" },
+    { label:"인도네시아", value:idCount, sub:"명", color:"#c792ea" },
+    { label:"자격증 만료/임박", value:expiringSoon.length, sub:"건", color:"#ff4d6d" },
+  ];
+
+  const recentCrew = [...crew].slice(-5).reverse();
+
+  document.getElementById('tab-dashboard').innerHTML = `
+    <div>
+      <div style="margin-bottom:24px;">
+        <h1 style="font-size:22px;font-weight:700;color:#ccd6f6;">대시보드</h1>
+        <p style="font-size:13px;color:#4a5568;margin-top:4px;">JSM International 선원 현황 요약</p>
+      </div>
+      <div class="stat-grid">
+        ${stats.map(s=>`
+          <div class="stat-card" style="min-width:130px;">
+            <div style="font-size:11px;color:#4a5568;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">${s.label}</div>
+            <div style="font-size:32px;font-weight:700;color:${s.color};font-family:'IBM Plex Mono',monospace;line-height:1;">${s.value}<span style="font-size:14px;font-weight:400;color:#4a5568;margin-left:4px;">${s.sub}</span></div>
+          </div>`).join('')}
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="section-title">최근 등록 선원</div>
+          ${recentCrew.map(c=>`
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1a2235;">
+              <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,${c.nationality==='Myanmar'?'#1a3a5c,#0d7377':'#2a1a4a,#6b3fa0'});display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">${rankShort(c.rank)}</div>
+              <div style="flex:1;">
+                <div style="font-size:13px;font-weight:600;color:#ccd6f6;">${c.name}</div>
+                <div style="font-size:11px;color:#4a5568;">${c.rank} · ${c.vessel}</div>
+              </div>
+              <span class="badge" style="background:${c.status==='onboard'?'#00d4aa20':'#f0a50020'};color:${statusColor[c.status]};">● ${statusLabel[c.status]}</span>
+            </div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="section-title">⚠ 자격증 만료 알림</div>
+          ${expiringSoon.length === 0 ? '<p style="color:#4a5568;font-size:13px;">만료 예정 자격증이 없습니다.</p>' :
+            expiringSoon.map(cert=>{
+              const owner = crew.find(c=>c.id===cert.crewId);
+              const d = daysUntil(cert.expiryDate);
+              return `
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1a2235;">
+                  <div style="width:36px;height:36px;border-radius:8px;background:${d<0?'#ff4d6d20':'#f0a50020'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${d<0?'#ff4d6d':'#f0a500'};">${d<0?'만료':'D-'+d}</div>
+                  <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:600;color:#ccd6f6;">${owner?.name}</div>
+                    <div style="font-size:11px;color:#4a5568;">${cert.type}</div>
+                  </div>
+                  <div style="font-size:11px;color:#4a5568;font-family:'IBM Plex Mono',monospace;">${cert.expiryDate}</div>
+                </div>`;
+            }).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── Crew ────────────────────────────────────────────────────────────────────
+function renderCrew() {
+  const fc = filteredCrew();
+  document.getElementById('tab-crew').innerHTML = `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h1 style="font-size:22px;font-weight:700;color:#ccd6f6;">선원 관리</h1>
+          <p style="font-size:13px;color:#4a5568;margin-top:4px;">총 ${fc.length}명 조회됨</p>
+        </div>
+        <button class="btn-primary" onclick="openModal()">+ 선원 등록</button>
+      </div>
+      <div class="filters">
+        <input class="input-field" style="width:240px;" placeholder="이름, 선원번호, 선박명 검색..." value="${searchTerm}" oninput="searchTerm=this.value;renderCrew()">
+        <select class="input-field" style="width:140px;" onchange="filterNat=this.value;renderCrew()">
+          <option value="all" ${filterNat==='all'?'selected':''}>전체 국적</option>
+          <option value="Myanmar" ${filterNat==='Myanmar'?'selected':''}>미얀마</option>
+          <option value="Indonesia" ${filterNat==='Indonesia'?'selected':''}>인도네시아</option>
+        </select>
+        <select class="input-field" style="width:130px;" onchange="filterStatus=this.value;renderCrew()">
+          <option value="all" ${filterStatus==='all'?'selected':''}>전체 상태</option>
+          <option value="onboard" ${filterStatus==='onboard'?'selected':''}>승선중</option>
+          <option value="leave" ${filterStatus==='leave'?'selected':''}>휴가중</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead><tr>
+            <th>선원번호</th><th>이름</th><th>국적</th><th>직책</th><th>선박</th><th>선사</th><th>상태</th><th>승선일</th><th>하선일</th><th></th>
+          </tr></thead>
+          <tbody>
+            ${fc.map(c=>`
+              <tr class="row-hover" style="cursor:pointer;" onclick="openPanel(${c.id},'detail')">
+                <td><span class="mono" style="color:#64ffda;font-size:12px;">${c.crewNo}</span></td>
+                <td style="font-weight:600;color:#ccd6f6;">${c.name}</td>
+                <td><span class="tag" style="background:${c.nationality==='Myanmar'?'#1a3a5c':'#2a1a4a'};color:${c.nationality==='Myanmar'?'#7eb8f7':'#c792ea'};">${c.nationality==='Myanmar'?'🇲🇲 MM':'🇮🇩 ID'}</span></td>
+                <td style="color:#a8b2d8;">${c.rank}</td>
+                <td style="color:#a8b2d8;">${c.vessel}</td>
+                <td style="color:#6a7490;font-size:12px;">${c.shipowner}</td>
+                <td><span class="badge" style="background:${c.status==='onboard'?'#00d4aa15':'#f0a50015'};color:${statusColor[c.status]};">● ${statusLabel[c.status]}</span></td>
+                <td style="color:#6a7490;font-family:'IBM Plex Mono',monospace;font-size:12px;">${c.joinDate}</td>
+                <td style="color:#6a7490;font-family:'IBM Plex Mono',monospace;font-size:12px;">${c.signOffDate}</td>
+                <td onclick="event.stopPropagation()">
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn-ghost-sm" onclick="openPanel(${c.id},'cert')">자격증</button>
+                    <button class="btn-ghost-sm" onclick="openPanel(${c.id},'eval')">고과</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ─── Certificates ─────────────────────────────────────────────────────────────
+function renderCertificates() {
+  document.getElementById('tab-certificates').innerHTML = `
+    <div>
+      <div style="margin-bottom:20px;">
+        <h1 style="font-size:22px;font-weight:700;color:#ccd6f6;">자격증 관리</h1>
+        <p style="font-size:13px;color:#4a5568;margin-top:4px;">STCW, CoC, 면허증 등 유효기간 관리</p>
+      </div>
+      <div class="stat-grid" style="margin-bottom:20px;">
+        ${[['전체',certs.length,'#64ffda'],['유효',certs.filter(c=>certStatus(c.expiryDate)==='valid').length,'#00d4aa'],['만료임박',certs.filter(c=>certStatus(c.expiryDate)==='expiring').length,'#f0a500'],['만료',certs.filter(c=>certStatus(c.expiryDate)==='expired').length,'#ff4d6d']].map(([l,v,color])=>`
+          <div class="stat-card" style="min-width:100px;">
+            <div style="font-size:11px;color:#4a5568;margin-bottom:6px;">${l}</div>
+            <div style="font-size:28px;font-weight:700;color:${color};font-family:'IBM Plex Mono',monospace;">${v}</div>
+          </div>`).join('')}
+      </div>
+      <div class="card" style="padding:0;">
+        <table>
+          <thead><tr>
+            <th>선원명</th><th>직책</th><th>자격증 종류</th><th>증서번호</th><th>발급일</th><th>만료일</th><th>D-Day</th><th>상태</th>
+          </tr></thead>
+          <tbody>
+            ${certs.map(cert=>{
+              const owner = crew.find(c=>c.id===cert.crewId);
+              const st = certStatus(cert.expiryDate);
+              const d = daysUntil(cert.expiryDate);
+              return `
+                <tr class="row-hover">
+                  <td style="font-weight:600;color:#ccd6f6;">${owner?.name}</td>
+                  <td style="color:#6a7490;font-size:12px;">${owner?.rank}</td>
+                  <td style="color:#a8b2d8;">${cert.type}</td>
+                  <td><span class="mono" style="color:#64ffda;font-size:12px;">${cert.certNo}</span></td>
+                  <td style="color:#6a7490;font-family:'IBM Plex Mono',monospace;font-size:12px;">${cert.issueDate}</td>
+                  <td style="color:#6a7490;font-family:'IBM Plex Mono',monospace;font-size:12px;">${cert.expiryDate}</td>
+                  <td style="color:${d<0?'#ff4d6d':d<90?'#f0a500':'#4a5568'};font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;">${d<0?Math.abs(d)+'일 경과':'D-'+d}</td>
+                  <td><span class="badge" style="background:${statusColor[st]}15;color:${statusColor[st]};">● ${statusLabel[st]}</span></td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ─── Payroll ──────────────────────────────────────────────────────────────────
+function renderPayroll() {
+  const total = crew.reduce((s,c)=>s+calcPay(c).net,0);
+  document.getElementById('tab-payroll').innerHTML = `
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h1 style="font-size:22px;font-weight:700;color:#ccd6f6;">급여 관리</h1>
+          <p style="font-size:13px;color:#4a5568;margin-top:4px;">선사별 급여 계산 및 명세서 발행</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <select class="input-field" style="width:100px;" onchange="payMonth=parseInt(this.value);renderPayroll()">
+            ${MONTHS.map((m,i)=>`<option value="${i}" ${payMonth===i?'selected':''}>${m}</option>`).join('')}
+          </select>
+          <span style="color:#4a5568;font-size:13px;">2025</span>
+        </div>
+      </div>
+      <div class="card" style="padding:0;">
+        <table>
+          <thead><tr>
+            <th>선원명</th><th>직책</th><th>선사</th>
+            <th style="text-align:right;">기본급 (USD)</th>
+            <th style="text-align:right;">OT</th>
+            <th style="text-align:right;">수당</th>
+            <th style="text-align:right;">공제</th>
+            <th style="text-align:right;">실지급액</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            ${crew.map(c=>{
+              const pay = calcPay(c);
+              return `
+                <tr class="row-hover">
+                  <td style="font-weight:600;color:#ccd6f6;">${c.name}</td>
+                  <td style="color:#6a7490;font-size:12px;">${c.rank}</td>
+                  <td style="color:#6a7490;font-size:12px;">${c.shipowner}</td>
+                  <td style="text-align:right;font-family:'IBM Plex Mono',monospace;color:#a8b2d8;">$${pay.base.toLocaleString()}</td>
+                  <td style="text-align:right;font-family:'IBM Plex Mono',monospace;color:#a8b2d8;">$${pay.ot.toLocaleString()}</td>
+                  <td style="text-align:right;font-family:'IBM Plex Mono',monospace;color:#00d4aa;">+$${pay.allowances}</td>
+                  <td style="text-align:right;font-family:'IBM Plex Mono',monospace;color:#ff4d6d;">-$${pay.deductions}</td>
+                  <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700;color:#64ffda;">$${pay.net.toLocaleString()}</td>
+                  <td><button class="btn-ghost-sm">명세서</button></td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr style="background:#0d1220;border-top:2px solid #1e2a42;">
+              <td colspan="7" style="padding:12px 16px;font-size:12px;color:#4a5568;font-weight:600;">총 지급액 (${MONTHS[payMonth]} 2025)</td>
+              <td style="padding:12px 16px;text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700;color:#64ffda;font-size:15px;">$${total.toLocaleString()}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ─── Evaluation ───────────────────────────────────────────────────────────────
+function renderEvaluation() {
+  const scoreColor = s => s>=5?"#64ffda":s>=4?"#00d4aa":s>=3?"#f0a500":"#ff4d6d";
+  const scoreLabels = ["항해술","리더십","소통","안전","팀워크"];
+  document.getElementById('tab-evaluation').innerHTML = `
+    <div>
+      <div style="margin-bottom:20px;">
+        <h1 style="font-size:22px;font-weight:700;color:#ccd6f6;">고과 관리</h1>
+        <p style="font-size:13px;color:#4a5568;margin-top:4px;">항차별 선원 성과 평가 기록</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        ${evals.map(ev=>{
+          const c = crew.find(x=>x.id===ev.crewId);
+          const scores = [ev.seamanship,ev.leadership,ev.communication,ev.safety,ev.teamwork];
+          return `
+            <div class="card">
+              <div style="display:flex;align-items:flex-start;gap:16px;">
+                <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#1a3a5c,#0d7377);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;">${rankShort(c?.rank)}</div>
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;">
+                    <span style="font-weight:700;font-size:15px;color:#ccd6f6;">${c?.name}</span>
+                    <span style="font-size:12px;color:#4a5568;">${c?.rank}</span>
+                    <span style="font-size:12px;color:#4a5568;">·</span>
+                    <span style="font-size:12px;color:#4a5568;">${ev.period}</span>
+                    <span class="badge" style="background:${ev.reHire?'#00d4aa15':'#ff4d6d15'};color:${ev.reHire?'#00d4aa':'#ff4d6d'};">${ev.reHire?'재고용 권장':'재고용 비권장'}</span>
+                  </div>
+                  <div style="font-size:12px;color:#4a5568;margin-bottom:12px;">평가자: ${ev.evaluator}</div>
+                  <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+                    ${scores.map((s,i)=>`
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                        <div style="width:32px;height:32px;border-radius:50%;background:${scoreColor(s)}20;color:${scoreColor(s)};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">${s}</div>
+                        <div style="font-size:10px;color:#4a5568;">${scoreLabels[i]}</div>
+                      </div>`).join('')}
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:8px;">
+                      <div style="width:40px;height:40px;border-radius:50%;background:#64ffda20;color:#64ffda;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;">${ev.overall}</div>
+                      <div style="font-size:10px;color:#64ffda;font-weight:600;">종합</div>
+                    </div>
+                  </div>
+                  <div style="font-size:13px;color:#8892b0;font-style:italic;padding:10px 14px;background:#0d1220;border-radius:6px;border-left:3px solid #1e2a42;">"${ev.comment}"</div>
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ─── Panel ───────────────────────────────────────────────────────────────────
+function openPanel(crewId, panel) {
+  selectedCrew = crew.find(c=>c.id===crewId);
+  document.getElementById('panel-name').textContent = selectedCrew.name;
+  document.getElementById('panel-sub').textContent = `${selectedCrew.crewNo} · ${selectedCrew.rank}`;
+
+  let html = '';
+  if (panel === 'detail') {
+    html = `
+      <div class="section-title">기본 정보</div>
+      ${[['국적',selectedCrew.nationality],['생년월일',selectedCrew.birthDate],['여권번호',selectedCrew.passportNo],['여권만료',selectedCrew.passportExpiry],['선원수첩',selectedCrew.seamanBook]].map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1a2235;">
+          <span style="font-size:13px;color:#4a5568;">${k}</span>
+          <span style="font-size:13px;color:#ccd6f6;font-family:'IBM Plex Mono',monospace;">${v}</span>
+        </div>`).join('')}
+      <div style="margin-top:20px;" class="section-title">승선 정보</div>
+      ${[['선박',selectedCrew.vessel],['선사',selectedCrew.shipowner],['상태',statusLabel[selectedCrew.status]],['승선일',selectedCrew.joinDate],['하선예정',selectedCrew.signOffDate]].map(([k,v])=>`
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1a2235;">
+          <span style="font-size:13px;color:#4a5568;">${k}</span>
+          <span style="font-size:13px;color:#ccd6f6;">${v}</span>
+        </div>`).join('')}`;
+  } else if (panel === 'cert') {
+    const myCerts = certs.filter(c=>c.crewId===selectedCrew.id);
+    html = `<div class="section-title">보유 자격증</div>`;
+    if (myCerts.length === 0) {
+      html += `<p style="color:#4a5568;font-size:13px;">등록된 자격증이 없습니다.</p>`;
+    } else {
+      html += myCerts.map(cert=>{
+        const st = certStatus(cert.expiryDate);
+        const d = daysUntil(cert.expiryDate);
+        return `
+          <div style="padding:14px;background:#0d1220;border-radius:8px;margin-bottom:10px;border:1px solid ${st==='valid'?'#1e2a42':statusColor[st]+'40'};">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:13px;font-weight:600;color:#ccd6f6;">${cert.type}</span>
+              <span class="badge" style="background:${statusColor[st]}15;color:${statusColor[st]};">${statusLabel[st]}</span>
+            </div>
+            <div style="font-size:12px;color:#4a5568;font-family:'IBM Plex Mono',monospace;">${cert.certNo}</div>
+            <div style="font-size:12px;color:#4a5568;margin-top:4px;">만료: ${cert.expiryDate} ${d>=0?'(D-'+d+')':'('+Math.abs(d)+'일 경과)'}</div>
+          </div>`;
+      }).join('');
+    }
+  } else if (panel === 'eval') {
+    const myEvals = evals.filter(e=>e.crewId===selectedCrew.id);
+    html = `<div class="section-title">고과 이력</div>`;
+    if (myEvals.length === 0) {
+      html += `<p style="color:#4a5568;font-size:13px;">등록된 고과 이력이 없습니다.</p>`;
+    } else {
+      html += myEvals.map(ev=>`
+        <div style="padding:14px;background:#0d1220;border-radius:8px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:600;color:#ccd6f6;">${ev.period}</span>
+            <span class="badge" style="background:#64ffda15;color:#64ffda;">종합 ${ev.overall}점</span>
+          </div>
+          <div style="font-size:12px;color:#4a5568;margin-bottom:8px;">평가자: ${ev.evaluator}</div>
+          <div style="font-size:12px;color:#8892b0;font-style:italic;">"${ev.comment}"</div>
+        </div>`).join('');
+    }
+  }
+
+  document.getElementById('panel-content').innerHTML = html;
+  document.getElementById('side-panel-overlay').classList.remove('hidden');
+}
+
+function closePanel() {
+  document.getElementById('side-panel-overlay').classList.add('hidden');
+  selectedCrew = null;
+}
+
+// ─── Modal ───────────────────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('add-crew-modal').classList.remove('hidden');
+}
+function closeModal() {
+  document.getElementById('add-crew-modal').classList.add('hidden');
+}
+function addCrew() {
+  const nationality = document.getElementById('new-nationality').value;
+  const prefix = nationality === 'Myanmar' ? 'MM' : 'ID';
+  const count = String(crew.filter(c=>c.nationality===nationality).length + 1).padStart(4,'0');
+  const newMember = {
+    id: crew.length + 1,
+    crewNo: `${prefix}-${count}`,
+    name: document.getElementById('new-name').value,
+    nationality,
+    rank: document.getElementById('new-rank').value,
+    vessel: document.getElementById('new-vessel').value,
+    shipowner: document.getElementById('new-shipowner').value,
+    status: document.getElementById('new-status').value,
+    birthDate: document.getElementById('new-birthDate').value,
+    passportNo: document.getElementById('new-passportNo').value,
+    passportExpiry: document.getElementById('new-passportExpiry').value,
+    seamanBook: document.getElementById('new-seamanBook').value,
+    joinDate: document.getElementById('new-joinDate').value,
+    signOffDate: document.getElementById('new-signOffDate').value,
+    baseSalary: Number(document.getElementById('new-baseSalary').value),
+    overtimeRate: Number(document.getElementById('new-overtimeRate').value),
+    allowances: Number(document.getElementById('new-allowances').value),
+    deductions: Number(document.getElementById('new-deductions').value),
+  };
+  crew.push(newMember);
+  closeModal();
+  renderCrew();
+  renderDashboard();
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+renderDashboard();
+</script>
+</body>
+</html>
