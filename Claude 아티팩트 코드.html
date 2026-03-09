@@ -1,0 +1,567 @@
+import { useState, useEffect } from "react";
+
+// ─── Sample Data ───────────────────────────────────────────────────────────────
+const SAMPLE_CREW = [
+  { id: 1, crewNo: "MM-0001", name: "Kyaw Zin Oo", nationality: "Myanmar", rank: "Master", vessel: "MV Golden Star", shipowner: "Korea Shipping Co.", status: "onboard", birthDate: "1978-03-15", passportNo: "MA123456", passportExpiry: "2027-06-30", seamanBook: "MMR-20145", joinDate: "2024-01-10", signOffDate: "2024-07-10", baseSalary: 4200, overtimeRate: 15.5, allowances: 300, deductions: 200 },
+  { id: 2, crewNo: "MM-0002", name: "Aung Myo Thant", nationality: "Myanmar", rank: "Chief Officer", vessel: "MV Golden Star", shipowner: "Korea Shipping Co.", status: "onboard", birthDate: "1982-07-22", passportNo: "MA234567", passportExpiry: "2026-03-15", seamanBook: "MMR-20289", joinDate: "2024-02-05", signOffDate: "2024-08-05", baseSalary: 3200, overtimeRate: 12.0, allowances: 250, deductions: 180 },
+  { id: 3, crewNo: "MM-0003", name: "Zaw Lin Htun", nationality: "Myanmar", rank: "2nd Officer", vessel: "MV Pacific Rose", shipowner: "Busan Marine Ltd.", status: "leave", birthDate: "1990-11-08", passportNo: "MA345678", passportExpiry: "2028-11-20", seamanBook: "MMR-20401", joinDate: "2023-11-01", signOffDate: "2024-05-01", baseSalary: 2400, overtimeRate: 10.0, allowances: 200, deductions: 150 },
+  { id: 4, crewNo: "ID-0001", name: "Budi Santoso", nationality: "Indonesia", rank: "Chief Engineer", vessel: "MV Pacific Rose", shipowner: "Busan Marine Ltd.", status: "onboard", birthDate: "1975-05-30", passportNo: "A1234567", passportExpiry: "2025-12-01", seamanBook: "IDN-10023", joinDate: "2024-03-01", signOffDate: "2024-09-01", baseSalary: 3800, overtimeRate: 14.0, allowances: 280, deductions: 190 },
+  { id: 5, crewNo: "ID-0002", name: "Eko Prasetyo", nationality: "Indonesia", rank: "2nd Engineer", vessel: "MV Horizon Ace", shipowner: "Sejong Shipping", status: "onboard", birthDate: "1988-09-14", passportNo: "B9876543", passportExpiry: "2027-04-10", seamanBook: "IDN-10187", joinDate: "2024-01-20", signOffDate: "2024-07-20", baseSalary: 2800, overtimeRate: 11.0, allowances: 220, deductions: 160 },
+  { id: 6, crewNo: "MM-0004", name: "Htet Myat Aung", nationality: "Myanmar", rank: "Bosun", vessel: "MV Horizon Ace", shipowner: "Sejong Shipping", status: "leave", birthDate: "1993-02-18", passportNo: "MA456789", passportExpiry: "2026-08-25", seamanBook: "MMR-20563", joinDate: "2023-09-15", signOffDate: "2024-03-15", baseSalary: 1600, overtimeRate: 8.0, allowances: 150, deductions: 100 },
+];
+
+const SAMPLE_CERTS = [
+  { id: 1, crewId: 1, type: "STCW Basic Safety", certNo: "BS-2021-0045", issueDate: "2021-03-10", expiryDate: "2026-03-10", issuedBy: "Myanmar Port Authority", status: "valid" },
+  { id: 2, crewId: 1, type: "GMDSS GOC", certNo: "GOC-2019-0123", issueDate: "2019-06-15", expiryDate: "2024-06-15", issuedBy: "Myanmar Port Authority", status: "expired" },
+  { id: 3, crewId: 1, type: "Master CoC", certNo: "MCC-2020-0067", issueDate: "2020-01-20", expiryDate: "2025-01-20", issuedBy: "Myanmar DMA", status: "expiring" },
+  { id: 4, crewId: 2, type: "STCW Basic Safety", certNo: "BS-2022-0189", issueDate: "2022-05-01", expiryDate: "2027-05-01", issuedBy: "Myanmar Port Authority", status: "valid" },
+  { id: 5, crewId: 4, type: "STCW Basic Safety", certNo: "BS-IDN-0234", issueDate: "2021-08-20", expiryDate: "2026-08-20", issuedBy: "DEPHUB Indonesia", status: "valid" },
+  { id: 6, crewId: 4, type: "Chief Engineer CoC", certNo: "CE-IDN-0089", issueDate: "2019-11-05", expiryDate: "2024-11-05", issuedBy: "DEPHUB Indonesia", status: "expiring" },
+];
+
+const SAMPLE_EVALS = [
+  { id: 1, crewId: 1, period: "2023 H2", evaluator: "Capt. Kim Sung-ho", seamanship: 5, leadership: 5, communication: 4, safety: 5, teamwork: 5, overall: 5, comment: "Outstanding performance. Highly recommended for re-hire.", reHire: true },
+  { id: 2, crewId: 2, period: "2023 H2", evaluator: "Capt. Kim Sung-ho", seamanship: 4, leadership: 4, communication: 4, safety: 4, teamwork: 5, overall: 4, comment: "Good officer. Reliable and professional.", reHire: true },
+  { id: 3, crewId: 4, period: "2023 H2", evaluator: "Chief Eng. Park", seamanship: 5, leadership: 4, communication: 3, safety: 5, teamwork: 4, overall: 4, comment: "Excellent engineer. Language barrier minor issue.", reHire: true },
+];
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const RANKS = ["Master","Chief Officer","2nd Officer","3rd Officer","Chief Engineer","2nd Engineer","3rd Engineer","4th Engineer","Bosun","AB","OS","Oiler","Wiper","Cook","Steward"];
+const SHIPOWNERS = ["Korea Shipping Co.","Busan Marine Ltd.","Sejong Shipping","HMM","Pan Ocean","SK Shipping"];
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+const daysUntil = (dateStr) => {
+  const diff = new Date(dateStr) - new Date();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+const certStatus = (expiry) => {
+  const d = daysUntil(expiry);
+  if (d < 0) return "expired";
+  if (d < 90) return "expiring";
+  return "valid";
+};
+const statusColor = { onboard: "#00d4aa", leave: "#f0a500", expired: "#ff4d6d", expiring: "#f0a500", valid: "#00d4aa" };
+const statusLabel = { onboard: "승선중", leave: "휴가중", expired: "만료", expiring: "만료임박", valid: "유효" };
+const rankShort = (r) => r?.split(" ").map(w=>w[0]).join("") || "??";
+
+export default function App() {
+  const [tab, setTab] = useState("dashboard");
+  const [crew, setCrew] = useState(SAMPLE_CREW);
+  const [certs, setCerts] = useState(SAMPLE_CERTS);
+  const [evals] = useState(SAMPLE_EVALS);
+  const [selectedCrew, setSelectedCrew] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterNat, setFilterNat] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [payMonth, setPayMonth] = useState(2);
+  const [payYear] = useState(2025);
+  const [showAddCrew, setShowAddCrew] = useState(false);
+  const [newCrew, setNewCrew] = useState({ name:"", nationality:"Myanmar", rank:"", vessel:"", shipowner:"", status:"onboard", birthDate:"", passportNo:"", passportExpiry:"", seamanBook:"", joinDate:"", signOffDate:"", baseSalary:0, overtimeRate:0, allowances:0, deductions:0 });
+  const [sidePanel, setSidePanel] = useState(null); // 'detail' | 'cert' | 'eval'
+
+  const filteredCrew = crew.filter(c => {
+    const matchSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.crewNo.toLowerCase().includes(searchTerm.toLowerCase()) || c.vessel.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchNat = filterNat === "all" || c.nationality === filterNat;
+    const matchStatus = filterStatus === "all" || c.status === filterStatus;
+    return matchSearch && matchNat && matchStatus;
+  });
+
+  const expiringSoon = certs.filter(c => certStatus(c.expiryDate) !== "valid");
+  const onboardCount = crew.filter(c => c.status === "onboard").length;
+  const leaveCount = crew.filter(c => c.status === "leave").length;
+  const mmCount = crew.filter(c => c.nationality === "Myanmar").length;
+  const idCount = crew.filter(c => c.nationality === "Indonesia").length;
+
+  const addCrew = () => {
+    const id = crew.length + 1;
+    const prefix = newCrew.nationality === "Myanmar" ? "MM" : "ID";
+    const count = String(crew.filter(c=>c.nationality===newCrew.nationality).length + 1).padStart(4,"0");
+    setCrew([...crew, { ...newCrew, id, crewNo: `${prefix}-${count}` }]);
+    setShowAddCrew(false);
+    setNewCrew({ name:"", nationality:"Myanmar", rank:"", vessel:"", shipowner:"", status:"onboard", birthDate:"", passportNo:"", passportExpiry:"", seamanBook:"", joinDate:"", signOffDate:"", baseSalary:0, overtimeRate:0, allowances:0, deductions:0 });
+  };
+
+  const calcPay = (c) => {
+    const ot = c.overtimeRate * 208; // 208hrs standard OT base
+    return { base: c.baseSalary, ot: Math.round(ot), allowances: c.allowances, deductions: c.deductions, net: Math.round(c.baseSalary + ot + c.allowances - c.deductions) };
+  };
+
+  const openPanel = (crewMember, panel) => { setSelectedCrew(crewMember); setSidePanel(panel); };
+  const closePanel = () => { setSelectedCrew(null); setSidePanel(null); };
+
+  return (
+    <div style={{ fontFamily:"'IBM Plex Sans', 'Noto Sans KR', sans-serif", background:"#0a0e1a", minHeight:"100vh", color:"#e8eaf0", display:"flex", flexDirection:"column" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0;}
+        ::-webkit-scrollbar{width:6px;height:6px;}
+        ::-webkit-scrollbar-track{background:#12182b;}
+        ::-webkit-scrollbar-thumb{background:#2a3350;border-radius:3px;}
+        input,select,textarea{outline:none;font-family:inherit;}
+        button{cursor:pointer;font-family:inherit;}
+        .nav-btn{background:none;border:none;padding:10px 20px;color:#8892b0;font-size:13px;font-weight:500;letter-spacing:0.05em;transition:all 0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
+        .nav-btn.active{color:#64ffda;border-bottom:2px solid #64ffda;}
+        .nav-btn:hover{color:#ccd6f6;}
+        .card{background:#111827;border:1px solid #1e2a42;border-radius:8px;padding:20px;}
+        .stat-card{background:#111827;border:1px solid #1e2a42;border-radius:8px;padding:18px 22px;flex:1;}
+        .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.05em;}
+        .btn-primary{background:#0d7377;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:13px;font-weight:500;transition:all 0.2s;}
+        .btn-primary:hover{background:#14a085;}
+        .btn-ghost{background:transparent;color:#8892b0;border:1px solid #1e2a42;padding:7px 16px;border-radius:6px;font-size:13px;transition:all 0.2s;}
+        .btn-ghost:hover{border-color:#64ffda;color:#64ffda;}
+        .row-hover:hover{background:#161f33 !important;}
+        .input-field{background:#0d1220;border:1px solid #1e2a42;border-radius:6px;padding:8px 12px;color:#e8eaf0;font-size:13px;width:100%;}
+        .input-field:focus{border-color:#64ffda;}
+        .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+        .panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:100;display:flex;justify-content:flex-end;}
+        .side-panel{background:#0f1525;border-left:1px solid #1e2a42;width:480px;height:100%;overflow-y:auto;padding:30px;animation:slideIn 0.25s ease;}
+        @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+        .score-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+        .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;}
+        .modal{background:#111827;border:1px solid #1e2a42;border-radius:12px;padding:30px;width:600px;max-height:80vh;overflow-y:auto;}
+        .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .section-title{font-size:11px;font-weight:600;letter-spacing:0.12em;color:#4a5568;text-transform:uppercase;margin-bottom:14px;}
+        .mono{font-family:'IBM Plex Mono',monospace;}
+      `}</style>
+
+      {/* Header */}
+      <div style={{ background:"#0a0e1a", borderBottom:"1px solid #1e2a42", padding:"0 24px", display:"flex", alignItems:"center", gap:24, position:"sticky", top:0, zIndex:50 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, padding:"14px 0", borderRight:"1px solid #1e2a42", paddingRight:24, minWidth:200 }}>
+          <div style={{ width:32, height:32, background:"linear-gradient(135deg,#0d7377,#14a085)", borderRadius:8, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:13, color:"#fff", fontFamily:"'IBM Plex Mono',monospace" }}>JSM</div>
+          <div>
+            <div style={{ fontWeight:700, fontSize:13, color:"#ccd6f6", letterSpacing:"0.05em" }}>JSM International</div>
+            <div style={{ fontSize:10, color:"#4a5568", letterSpacing:"0.08em" }}>CREW MANAGEMENT SYSTEM</div>
+          </div>
+        </div>
+        <nav style={{ display:"flex", gap:2, overflowX:"auto" }}>
+          {[["dashboard","대시보드"],["crew","선원관리"],["certificates","자격증관리"],["payroll","급여관리"],["evaluation","고과관리"]].map(([k,v])=>(
+            <button key={k} className={`nav-btn ${tab===k?"active":""}`} onClick={()=>setTab(k)}>{v}</button>
+          ))}
+        </nav>
+        <div style={{ marginLeft:"auto", display:"flex", alignItems:"center", gap:8 }}>
+          <div style={{ width:8, height:8, borderRadius:"50%", background:"#00d4aa", boxShadow:"0 0 6px #00d4aa" }}></div>
+          <span style={{ fontSize:12, color:"#4a5568" }}>Admin</span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex:1, padding:"24px", maxWidth:1400, width:"100%", margin:"0 auto" }}>
+
+        {/* ── Dashboard ── */}
+        {tab==="dashboard" && (
+          <div>
+            <div style={{ marginBottom:24 }}>
+              <h1 style={{ fontSize:22, fontWeight:700, color:"#ccd6f6" }}>대시보드</h1>
+              <p style={{ fontSize:13, color:"#4a5568", marginTop:4 }}>JSM International 선원 현황 요약</p>
+            </div>
+            <div style={{ display:"flex", gap:14, marginBottom:20, flexWrap:"wrap" }}>
+              {[
+                { label:"전체 선원", value: crew.length, sub:"명", color:"#64ffda" },
+                { label:"승선중", value: onboardCount, sub:"명", color:"#00d4aa" },
+                { label:"휴가중", value: leaveCount, sub:"명", color:"#f0a500" },
+                { label:"미얀마", value: mmCount, sub:"명", color:"#7eb8f7" },
+                { label:"인도네시아", value: idCount, sub:"명", color:"#c792ea" },
+                { label:"자격증 만료/임박", value: expiringSoon.length, sub:"건", color:"#ff4d6d" },
+              ].map((s,i)=>(
+                <div key={i} className="stat-card" style={{ minWidth:130 }}>
+                  <div style={{ fontSize:11, color:"#4a5568", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:8 }}>{s.label}</div>
+                  <div style={{ fontSize:32, fontWeight:700, color:s.color, fontFamily:"'IBM Plex Mono',monospace", lineHeight:1 }}>{s.value}<span style={{ fontSize:14, fontWeight:400, color:"#4a5568", marginLeft:4 }}>{s.sub}</span></div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+              {/* 최근 선원 */}
+              <div className="card">
+                <div className="section-title">최근 등록 선원</div>
+                {crew.slice(-5).reverse().map(c=>(
+                  <div key={c.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #1a2235" }}>
+                    <div style={{ width:36, height:36, borderRadius:8, background:`linear-gradient(135deg, ${c.nationality==="Myanmar"?"#1a3a5c,#0d7377":"#2a1a4a,#6b3fa0"})`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#fff" }}>{rankShort(c.rank)}</div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#ccd6f6" }}>{c.name}</div>
+                      <div style={{ fontSize:11, color:"#4a5568" }}>{c.rank} · {c.vessel}</div>
+                    </div>
+                    <span className="badge" style={{ background: c.status==="onboard"?"#00d4aa20":"#f0a50020", color:statusColor[c.status] }}>● {statusLabel[c.status]}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 자격증 만료 알림 */}
+              <div className="card">
+                <div className="section-title">⚠ 자격증 만료 알림</div>
+                {expiringSoon.length === 0 && <p style={{ color:"#4a5568", fontSize:13 }}>만료 예정 자격증이 없습니다.</p>}
+                {expiringSoon.map(cert=>{
+                  const owner = crew.find(c=>c.id===cert.crewId);
+                  const d = daysUntil(cert.expiryDate);
+                  return (
+                    <div key={cert.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #1a2235" }}>
+                      <div style={{ width:36, height:36, borderRadius:8, background: d<0?"#ff4d6d20":"#f0a50020", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700, color: d<0?"#ff4d6d":"#f0a500" }}>{d<0?"만료":"D-"+d}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, fontWeight:600, color:"#ccd6f6" }}>{owner?.name}</div>
+                        <div style={{ fontSize:11, color:"#4a5568" }}>{cert.type}</div>
+                      </div>
+                      <div style={{ fontSize:11, color:"#4a5568", fontFamily:"'IBM Plex Mono',monospace" }}>{cert.expiryDate}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Crew List ── */}
+        {tab==="crew" && (
+          <div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+              <div>
+                <h1 style={{ fontSize:22, fontWeight:700, color:"#ccd6f6" }}>선원 관리</h1>
+                <p style={{ fontSize:13, color:"#4a5568", marginTop:4 }}>총 {filteredCrew.length}명 조회됨</p>
+              </div>
+              <button className="btn-primary" onClick={()=>setShowAddCrew(true)}>+ 선원 등록</button>
+            </div>
+
+            {/* Filters */}
+            <div style={{ display:"flex", gap:10, marginBottom:16, flexWrap:"wrap" }}>
+              <input className="input-field" style={{ width:240 }} placeholder="이름, 선원번호, 선박명 검색..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
+              <select className="input-field" style={{ width:140 }} value={filterNat} onChange={e=>setFilterNat(e.target.value)}>
+                <option value="all">전체 국적</option>
+                <option value="Myanmar">미얀마</option>
+                <option value="Indonesia">인도네시아</option>
+              </select>
+              <select className="input-field" style={{ width:130 }} value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}>
+                <option value="all">전체 상태</option>
+                <option value="onboard">승선중</option>
+                <option value="leave">휴가중</option>
+              </select>
+            </div>
+
+            {/* Table */}
+            <div className="card" style={{ padding:0, overflow:"hidden" }}>
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+                <thead>
+                  <tr style={{ background:"#0d1220", borderBottom:"1px solid #1e2a42" }}>
+                    {["선원번호","이름","국적","직책","선박","선사","상태","승선일","하선일",""].map((h,i)=>(
+                      <th key={i} style={{ padding:"12px 16px", textAlign:"left", fontSize:11, fontWeight:600, color:"#4a5568", letterSpacing:"0.08em", whiteSpace:"nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCrew.map(c=>(
+                    <tr key={c.id} className="row-hover" style={{ borderBottom:"1px solid #1a2235", cursor:"pointer" }} onClick={()=>openPanel(c,"detail")}>
+                      <td style={{ padding:"12px 16px" }}><span className="mono" style={{ color:"#64ffda", fontSize:12 }}>{c.crewNo}</span></td>
+                      <td style={{ padding:"12px 16px", fontWeight:600, color:"#ccd6f6" }}>{c.name}</td>
+                      <td style={{ padding:"12px 16px" }}>
+                        <span className="tag" style={{ background: c.nationality==="Myanmar"?"#1a3a5c":"#2a1a4a", color: c.nationality==="Myanmar"?"#7eb8f7":"#c792ea" }}>{c.nationality==="Myanmar"?"🇲🇲 MM":"🇮🇩 ID"}</span>
+                      </td>
+                      <td style={{ padding:"12px 16px", color:"#a8b2d8" }}>{c.rank}</td>
+                      <td style={{ padding:"12px 16px", color:"#a8b2d8" }}>{c.vessel}</td>
+                      <td style={{ padding:"12px 16px", color:"#6a7490", fontSize:12 }}>{c.shipowner}</td>
+                      <td style={{ padding:"12px 16px" }}><span className="badge" style={{ background: c.status==="onboard"?"#00d4aa15":"#f0a50015", color:statusColor[c.status] }}>● {statusLabel[c.status]}</span></td>
+                      <td style={{ padding:"12px 16px", color:"#6a7490", fontFamily:"'IBM Plex Mono',monospace", fontSize:12 }}>{c.joinDate}</td>
+                      <td style={{ padding:"12px 16px", color:"#6a7490", fontFamily:"'IBM Plex Mono',monospace", fontSize:12 }}>{c.signOffDate}</td>
+                      <td style={{ padding:"12px 16px" }}>
+                        <div style={{ display:"flex", gap:6 }} onClick={e=>e.stopPropagation()}>
+                          <button className="btn-ghost" style={{ padding:"4px 10px", fontSize:11 }} onClick={()=>openPanel(c,"cert")}>자격증</button>
+                          <button className="btn-ghost" style={{ padding:"4px 10px", fontSize:11 }} onClick={()=>openPanel(c,"eval")}>고과</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Certificates ── */}
+        {tab==="certificates" && (
+          <div>
+            <div style={{ marginBottom:20 }}>
+              <h1 style={{ fontSize:22, fontWeight:700, color:"#ccd6f6" }}>자격증 관리</h1>
+              <p style={{ fontSize:13, color:"#4a5568", marginTop:4 }}>STCW, CoC, 면허증 등 유효기간 관리</p>
+            </div>
+            <div style={{ display:"flex", gap:14, marginBottom:20 }}>
+              {[["전체",certs.length,"#64ffda"],["유효",certs.filter(c=>certStatus(c.expiryDate)==="valid").length,"#00d4aa"],["만료임박",certs.filter(c=>certStatus(c.expiryDate)==="expiring").length,"#f0a500"],["만료",certs.filter(c=>certStatus(c.expiryDate)==="expired").length,"#ff4d6d"]].map(([l,v,color],i)=>(
+                <div key={i} className="stat-card" style={{ minWidth:100 }}>
+                  <div style={{ fontSize:11, color:"#4a5568", marginBottom:6 }}>{l}</div>
+                  <div style={{ fontSize:28, fontWeight:700, color, fontFamily:"'IBM Plex Mono',monospace" }}>{v}</div>
+                </div>
+              ))}
+            </div>
+            <div className="card" style={{ padding:0 }}>
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+                <thead>
+                  <tr style={{ background:"#0d1220", borderBottom:"1px solid #1e2a42" }}>
+                    {["선원명","직책","자격증 종류","증서번호","발급일","만료일","D-Day","상태"].map((h,i)=>(
+                      <th key={i} style={{ padding:"12px 16px", textAlign:"left", fontSize:11, fontWeight:600, color:"#4a5568", letterSpacing:"0.08em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {certs.map(cert=>{
+                    const owner = crew.find(c=>c.id===cert.crewId);
+                    const st = certStatus(cert.expiryDate);
+                    const d = daysUntil(cert.expiryDate);
+                    return (
+                      <tr key={cert.id} className="row-hover" style={{ borderBottom:"1px solid #1a2235" }}>
+                        <td style={{ padding:"12px 16px", fontWeight:600, color:"#ccd6f6" }}>{owner?.name}</td>
+                        <td style={{ padding:"12px 16px", color:"#6a7490", fontSize:12 }}>{owner?.rank}</td>
+                        <td style={{ padding:"12px 16px", color:"#a8b2d8" }}>{cert.type}</td>
+                        <td style={{ padding:"12px 16px" }}><span className="mono" style={{ color:"#64ffda", fontSize:12 }}>{cert.certNo}</span></td>
+                        <td style={{ padding:"12px 16px", color:"#6a7490", fontFamily:"'IBM Plex Mono',monospace", fontSize:12 }}>{cert.issueDate}</td>
+                        <td style={{ padding:"12px 16px", color:"#6a7490", fontFamily:"'IBM Plex Mono',monospace", fontSize:12 }}>{cert.expiryDate}</td>
+                        <td style={{ padding:"12px 16px" }}>
+                          <span style={{ color: d<0?"#ff4d6d": d<90?"#f0a500":"#4a5568", fontFamily:"'IBM Plex Mono',monospace", fontSize:12, fontWeight:600 }}>
+                            {d<0 ? `${Math.abs(d)}일 경과` : `D-${d}`}
+                          </span>
+                        </td>
+                        <td style={{ padding:"12px 16px" }}>
+                          <span className="badge" style={{ background:`${statusColor[st]}15`, color:statusColor[st] }}>● {statusLabel[st]}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Payroll ── */}
+        {tab==="payroll" && (
+          <div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+              <div>
+                <h1 style={{ fontSize:22, fontWeight:700, color:"#ccd6f6" }}>급여 관리</h1>
+                <p style={{ fontSize:13, color:"#4a5568", marginTop:4 }}>선사별 급여 계산 및 명세서 발행</p>
+              </div>
+              <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                <select className="input-field" style={{ width:100 }} value={payMonth} onChange={e=>setPayMonth(Number(e.target.value))}>
+                  {MONTHS.map((m,i)=><option key={i} value={i}>{m}</option>)}
+                </select>
+                <span style={{ color:"#4a5568", fontSize:13 }}>{payYear}</span>
+              </div>
+            </div>
+
+            <div className="card" style={{ padding:0 }}>
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+                <thead>
+                  <tr style={{ background:"#0d1220", borderBottom:"1px solid #1e2a42" }}>
+                    {["선원명","직책","선사","기본급 (USD)","OT","수당","공제","실지급액",""].map((h,i)=>(
+                      <th key={i} style={{ padding:"12px 16px", textAlign: i>=3?"right":"left", fontSize:11, fontWeight:600, color:"#4a5568", letterSpacing:"0.08em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {crew.map(c=>{
+                    const pay = calcPay(c);
+                    return (
+                      <tr key={c.id} className="row-hover" style={{ borderBottom:"1px solid #1a2235" }}>
+                        <td style={{ padding:"12px 16px", fontWeight:600, color:"#ccd6f6" }}>{c.name}</td>
+                        <td style={{ padding:"12px 16px", color:"#6a7490", fontSize:12 }}>{c.rank}</td>
+                        <td style={{ padding:"12px 16px", color:"#6a7490", fontSize:12 }}>{c.shipowner}</td>
+                        <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", color:"#a8b2d8" }}>${pay.base.toLocaleString()}</td>
+                        <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", color:"#a8b2d8" }}>${pay.ot.toLocaleString()}</td>
+                        <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", color:"#00d4aa" }}>+${pay.allowances}</td>
+                        <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", color:"#ff4d6d" }}>-${pay.deductions}</td>
+                        <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", fontWeight:700, color:"#64ffda" }}>${pay.net.toLocaleString()}</td>
+                        <td style={{ padding:"12px 16px" }}>
+                          <button className="btn-ghost" style={{ padding:"4px 10px", fontSize:11 }}>명세서</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background:"#0d1220", borderTop:"2px solid #1e2a42" }}>
+                    <td colSpan={7} style={{ padding:"12px 16px", fontSize:12, color:"#4a5568", fontWeight:600 }}>총 지급액 ({MONTHS[payMonth]} {payYear})</td>
+                    <td style={{ padding:"12px 16px", textAlign:"right", fontFamily:"'IBM Plex Mono',monospace", fontWeight:700, color:"#64ffda", fontSize:15 }}>
+                      ${crew.reduce((s,c)=>s+calcPay(c).net,0).toLocaleString()}
+                    </td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Evaluation ── */}
+        {tab==="evaluation" && (
+          <div>
+            <div style={{ marginBottom:20 }}>
+              <h1 style={{ fontSize:22, fontWeight:700, color:"#ccd6f6" }}>고과 관리</h1>
+              <p style={{ fontSize:13, color:"#4a5568", marginTop:4 }}>항차별 선원 성과 평가 기록</p>
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+              {evals.map(ev=>{
+                const c = crew.find(x=>x.id===ev.crewId);
+                const scores = [ev.seamanship, ev.leadership, ev.communication, ev.safety, ev.teamwork];
+                const scoreLabels = ["항해술","리더십","소통","안전","팀워크"];
+                const scoreColor = (s) => s>=5?"#64ffda":s>=4?"#00d4aa":s>=3?"#f0a500":"#ff4d6d";
+                return (
+                  <div key={ev.id} className="card">
+                    <div style={{ display:"flex", alignItems:"flex-start", gap:16 }}>
+                      <div style={{ width:48, height:48, borderRadius:10, background:"linear-gradient(135deg,#1a3a5c,#0d7377)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, fontWeight:700, color:"#fff", flexShrink:0 }}>{rankShort(c?.rank)}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
+                          <span style={{ fontWeight:700, fontSize:15, color:"#ccd6f6" }}>{c?.name}</span>
+                          <span style={{ fontSize:12, color:"#4a5568" }}>{c?.rank}</span>
+                          <span style={{ fontSize:12, color:"#4a5568" }}>·</span>
+                          <span style={{ fontSize:12, color:"#4a5568" }}>{ev.period}</span>
+                          <span className="badge" style={{ background: ev.reHire?"#00d4aa15":"#ff4d6d15", color: ev.reHire?"#00d4aa":"#ff4d6d" }}>{ev.reHire?"재고용 권장":"재고용 비권장"}</span>
+                        </div>
+                        <div style={{ fontSize:12, color:"#4a5568", marginBottom:12 }}>평가자: {ev.evaluator}</div>
+                        <div style={{ display:"flex", gap:12, marginBottom:12, flexWrap:"wrap" }}>
+                          {scores.map((s,i)=>(
+                            <div key={i} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}>
+                              <div className="score-dot" style={{ background:`${scoreColor(s)}20`, color:scoreColor(s) }}>{s}</div>
+                              <div style={{ fontSize:10, color:"#4a5568" }}>{scoreLabels[i]}</div>
+                            </div>
+                          ))}
+                          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, marginLeft:8 }}>
+                            <div className="score-dot" style={{ background:"#64ffda20", color:"#64ffda", width:40, height:40, fontSize:16 }}>{ev.overall}</div>
+                            <div style={{ fontSize:10, color:"#64ffda", fontWeight:600 }}>종합</div>
+                          </div>
+                        </div>
+                        <div style={{ fontSize:13, color:"#8892b0", fontStyle:"italic", padding:"10px 14px", background:"#0d1220", borderRadius:6, borderLeft:"3px solid #1e2a42" }}>"{ev.comment}"</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Side Panel ── */}
+      {sidePanel && selectedCrew && (
+        <div className="panel-overlay" onClick={closePanel}>
+          <div className="side-panel" onClick={e=>e.stopPropagation()}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+              <div>
+                <div style={{ fontSize:18, fontWeight:700, color:"#ccd6f6" }}>{selectedCrew.name}</div>
+                <div style={{ fontSize:12, color:"#4a5568", marginTop:2 }}>{selectedCrew.crewNo} · {selectedCrew.rank}</div>
+              </div>
+              <button style={{ background:"none", border:"none", color:"#4a5568", fontSize:20, cursor:"pointer" }} onClick={closePanel}>✕</button>
+            </div>
+
+            {sidePanel==="detail" && (
+              <div>
+                <div className="section-title">기본 정보</div>
+                {[["국적", selectedCrew.nationality],["생년월일",selectedCrew.birthDate],["여권번호",selectedCrew.passportNo],["여권만료",selectedCrew.passportExpiry],["선원수첩",selectedCrew.seamanBook]].map(([k,v])=>(
+                  <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #1a2235" }}>
+                    <span style={{ fontSize:13, color:"#4a5568" }}>{k}</span>
+                    <span style={{ fontSize:13, color:"#ccd6f6", fontFamily:"'IBM Plex Mono',monospace" }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ marginTop:20 }} className="section-title">승선 정보</div>
+                {[["선박",selectedCrew.vessel],["선사",selectedCrew.shipowner],["상태",statusLabel[selectedCrew.status]],["승선일",selectedCrew.joinDate],["하선예정",selectedCrew.signOffDate]].map(([k,v])=>(
+                  <div key={k} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #1a2235" }}>
+                    <span style={{ fontSize:13, color:"#4a5568" }}>{k}</span>
+                    <span style={{ fontSize:13, color:"#ccd6f6" }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {sidePanel==="cert" && (
+              <div>
+                <div className="section-title">보유 자격증</div>
+                {certs.filter(c=>c.crewId===selectedCrew.id).map(cert=>{
+                  const st = certStatus(cert.expiryDate);
+                  const d = daysUntil(cert.expiryDate);
+                  return (
+                    <div key={cert.id} style={{ padding:14, background:"#0d1220", borderRadius:8, marginBottom:10, border:`1px solid ${st==="valid"?"#1e2a42":statusColor[st]+"40"}` }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
+                        <span style={{ fontSize:13, fontWeight:600, color:"#ccd6f6" }}>{cert.type}</span>
+                        <span className="badge" style={{ background:`${statusColor[st]}15`, color:statusColor[st] }}>{statusLabel[st]}</span>
+                      </div>
+                      <div style={{ fontSize:12, color:"#4a5568", fontFamily:"'IBM Plex Mono',monospace" }}>{cert.certNo}</div>
+                      <div style={{ fontSize:12, color:"#4a5568", marginTop:4 }}>만료: {cert.expiryDate} {d>=0?`(D-${d})`:`(${Math.abs(d)}일 경과)`}</div>
+                    </div>
+                  );
+                })}
+                {certs.filter(c=>c.crewId===selectedCrew.id).length===0 && <p style={{ color:"#4a5568", fontSize:13 }}>등록된 자격증이 없습니다.</p>}
+              </div>
+            )}
+
+            {sidePanel==="eval" && (
+              <div>
+                <div className="section-title">고과 이력</div>
+                {evals.filter(e=>e.crewId===selectedCrew.id).map(ev=>(
+                  <div key={ev.id} style={{ padding:14, background:"#0d1220", borderRadius:8, marginBottom:10 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
+                      <span style={{ fontSize:13, fontWeight:600, color:"#ccd6f6" }}>{ev.period}</span>
+                      <span className="badge" style={{ background:"#64ffda15", color:"#64ffda" }}>종합 {ev.overall}점</span>
+                    </div>
+                    <div style={{ fontSize:12, color:"#4a5568", marginBottom:8 }}>평가자: {ev.evaluator}</div>
+                    <div style={{ fontSize:12, color:"#8892b0", fontStyle:"italic" }}>"{ev.comment}"</div>
+                  </div>
+                ))}
+                {evals.filter(e=>e.crewId===selectedCrew.id).length===0 && <p style={{ color:"#4a5568", fontSize:13 }}>등록된 고과 이력이 없습니다.</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Add Crew Modal ── */}
+      {showAddCrew && (
+        <div className="modal-overlay" onClick={()=>setShowAddCrew(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24 }}>
+              <h2 style={{ fontSize:18, fontWeight:700, color:"#ccd6f6" }}>신규 선원 등록</h2>
+              <button style={{ background:"none", border:"none", color:"#4a5568", fontSize:20, cursor:"pointer" }} onClick={()=>setShowAddCrew(false)}>✕</button>
+            </div>
+            <div className="section-title">기본 정보</div>
+            <div className="grid2" style={{ marginBottom:20 }}>
+              {[["이름","name","text"],["국적","nationality","select-nat"],["직책","rank","select-rank"],["선박","vessel","text"],["선사","shipowner","select-owner"],["상태","status","select-status"],["생년월일","birthDate","date"],["여권번호","passportNo","text"],["여권만료","passportExpiry","date"],["선원수첩","seamanBook","text"],["승선일","joinDate","date"],["하선예정","signOffDate","date"]].map(([label,field,type])=>(
+                <div key={field}>
+                  <div style={{ fontSize:11, color:"#4a5568", marginBottom:5 }}>{label}</div>
+                  {type==="text"||type==="date" ? (
+                    <input type={type} className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:e.target.value})} />
+                  ) : type==="select-nat" ? (
+                    <select className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:e.target.value})}>
+                      <option value="Myanmar">Myanmar</option>
+                      <option value="Indonesia">Indonesia</option>
+                    </select>
+                  ) : type==="select-rank" ? (
+                    <select className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:e.target.value})}>
+                      <option value="">선택...</option>
+                      {RANKS.map(r=><option key={r} value={r}>{r}</option>)}
+                    </select>
+                  ) : type==="select-owner" ? (
+                    <select className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:e.target.value})}>
+                      <option value="">선택...</option>
+                      {SHIPOWNERS.map(s=><option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <select className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:e.target.value})}>
+                      <option value="onboard">승선중</option>
+                      <option value="leave">휴가중</option>
+                    </select>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="section-title">급여 정보 (USD)</div>
+            <div className="grid2" style={{ marginBottom:24 }}>
+              {[["기본급","baseSalary"],["OT 단가","overtimeRate"],["수당","allowances"],["공제","deductions"]].map(([label,field])=>(
+                <div key={field}>
+                  <div style={{ fontSize:11, color:"#4a5568", marginBottom:5 }}>{label}</div>
+                  <input type="number" className="input-field" value={newCrew[field]} onChange={e=>setNewCrew({...newCrew,[field]:Number(e.target.value)})} />
+                </div>
+              ))}
+            </div>
+            <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+              <button className="btn-ghost" onClick={()=>setShowAddCrew(false)}>취소</button>
+              <button className="btn-primary" onClick={addCrew}>등록</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
