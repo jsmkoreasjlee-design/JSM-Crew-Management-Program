@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSM Crew Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f0f4f8;min-height:100vh;color:#1a202c;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:#f0f4f8;}
+::-webkit-scrollbar-thumb{background:#cbd5e0;border-radius:3px;}
+input,select,textarea{outline:none;font-family:inherit;}
+button{cursor:pointer;font-family:inherit;}
+#app{display:flex;flex-direction:column;min-height:100vh;}
+.header{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 24px;display:flex;align-items:center;gap:24px;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.logo-area{display:flex;align-items:center;gap:10px;padding:14px 0;border-right:1px solid #e2e8f0;padding-right:24px;min-width:200px;}
+.logo-box{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;font-family:'IBM Plex Mono',monospace;}
+.content{flex:1;padding:28px;max-width:1440px;width:100%;margin:0 auto;}
+.nav-btn{background:none;border:none;padding:10px 18px;color:#64748b;font-size:13px;font-weight:500;transition:all 0.2s;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav-btn.active{color:#2563eb;border-bottom:2px solid #2563eb;}
+.nav-btn:hover{color:#1e40af;}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.btn-primary{background:#2563eb;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:13px;font-weight:500;transition:all 0.2s;}
+.btn-primary:hover{background:#1d4ed8;}
+.btn-ghost{background:transparent;color:#64748b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:7px;font-size:13px;transition:all 0.2s;}
+.btn-ghost:hover{border-color:#2563eb;color:#2563eb;}
+.btn-ghost-sm{background:transparent;color:#64748b;border:1px solid #e2e8f0;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;transition:all 0.2s;}
+.btn-ghost-sm:hover{border-color:#2563eb;color:#2563eb;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase;background:#f8fafc;border-bottom:1px solid #e2e8f0;}
+td{padding:12px 16px;border-bottom:1px solid #f1f5f9;color:#374151;}
+.row-hover:hover{background:#f8fafc;}
+.input-field{background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:8px 12px;color:#1a202c;font-size:13px;width:100%;transition:border 0.2s;}
+.input-field:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+.form-label{font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;letter-spacing:0.04em;text-transform:uppercase;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-green{background:#dcfce7;color:#16a34a;}
+.badge-red{background:#fee2e2;color:#dc2626;}
+.badge-yellow{background:#fef9c3;color:#ca8a04;}
+.badge-blue{background:#dbeafe;color:#2563eb;}
+.badge-gray{background:#f1f5f9;color:#64748b;}
+.tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.tag-mm{background:#dbeafe;color:#1d4ed8;}
+.tag-id{background:#f3e8ff;color:#7e22ce;}
+.tag-kr{background:#dcfce7;color:#16a34a;}
+.panel-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.4);z-index:100;display:flex;justify-content:flex-end;}
+.side-panel{background:#fff;border-left:1px solid #e2e8f0;width:500px;height:100%;overflow-y:auto;padding:28px;animation:slideIn 0.22s ease;box-shadow:-4px 0 20px rgba(0,0,0,0.08);}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.5);z-index:200;display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:12px;padding:28px;width:640px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.stat-grid{display:flex;gap:14px;margin-bottom:24px;flex-wrap:wrap;}
+.dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.section-title{font-size:11px;font-weight:700;letter-spacing:0.08em;color:#94a3b8;text-transform:uppercase;margin-bottom:14px;}
+.page-title{font-size:22px;font-weight:700;color:#0f172a;}
+.page-sub{font-size:13px;color:#94a3b8;margin-top:3px;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+.hidden{display:none!important;}
+.alert-box{background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-box">JSM</div>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#0f172a;">JSM International</div>
+        <div style="font-size:10px;color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase;">Crew Management System</div>
+      </div>
+    </div>
+    <nav style="display:flex;gap:2px;overflow-x:auto;">
+      <button class="nav-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="nav-btn" onclick="switchTab('companys')">Companies</button>
+      <button class="nav-btn" onclick="switchTab('vessels')">Vessels</button>
+      <button class="nav-btn" onclick="switchTab('certificates')">Certificates</button>
+      <button class="nav-btn" onclick="switchTab('crewstatus')">Crew Status</button>
+    </nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#16a34a;box-shadow:0 0 5px #16a34a66;"></div>
+      <span style="font-size:12px;color:#64748b;font-weight:500;">Admin</span>
+    </div>
+  </div>
+  <div class="content">
+    <div id="tab-dashboard"></div>
+    <div id="tab-companys" class="hidden"></div>
+    <div id="tab-vessels" class="hidden"></div>
+    <div id="tab-certificates" class="hidden"></div>
+    <div id="tab-crewstatus" class="hidden"></div>
+  </div>
+</div>
+
+<div id="side-panel-overlay" class="panel-overlay hidden" onclick="closePanel()">
+  <div class="side-panel" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
+      <div>
+        <div id="panel-name" style="font-size:17px;font-weight:700;color:#0f172a;"></div>
+        <div id="panel-sub" style="font-size:12px;color:#94a3b8;margin-top:2px;"></div>
+      </div>
+      <button style="background:#f1f5f9;border:none;color:#64748b;font-size:16px;cursor:pointer;width:32px;height:32px;border-radius:8px;" onclick="closePanel()">✕</button>
+    </div>
+    <div id="panel-content"></div>
+  </div>
+</div>
+
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;">
+      <h2 id="modal-title" style="font-size:17px;font-weight:700;color:#0f172a;"></h2>
+      <button style="background:#f1f5f9;border:none;color:#64748b;font-size:16px;cursor:pointer;width:32px;height:32px;border-radius:8px;" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+
+// ── vesselStats 헬퍼 ────────────────────────────────────────
+function getVesselTotal(vesselId){
+  const s=vesselStats[vesselId]; if(!s) return 0;
+  return Object.values(s).reduce((sum,nat)=>sum+(nat.MM||0)+(nat.ID||0)+(nat.KR||0),0);
+}
+function getVesselNat(vesselId,nat){
+  const s=vesselStats[vesselId]; if(!s) return 0;
+  return Object.values(s).reduce((sum,n)=>sum+(n[nat]||0),0);
+}
+function getVesselRankNat(vesselId,rank,nat){
+  const s=vesselStats[vesselId]; if(!s||!s[rank]) return 0;
+  return s[rank][nat]||0;
+}
+function getAllOnboard(){
+  return Object.values(vesselStats).reduce((sum,s)=>sum+Object.values(s).reduce((ss,n)=>ss+(n.MM||0)+(n.ID||0)+(n.KR||0),0),0);
+}
+function getAllNat(nat){
+  return Object.values(vesselStats).reduce((sum,s)=>sum+Object.values(s).reduce((ss,n)=>ss+(n[nat]||0),0),0);
+}
+function getCompanyOnboard(companyId){
+  const vids=vessels.filter(v=>v.companyId===companyId).map(v=>String(v.id));
+  return vids.reduce((sum,vid)=>sum+getVesselTotal(vid),0);
+}
+function getCompanyNat(companyId,nat){
+  const vids=vessels.filter(v=>v.companyId===companyId).map(v=>String(v.id));
+  return vids.reduce((sum,vid)=>sum+getVesselNat(vid,nat),0);
+}
+function saveVesselStat(vesselId,rank,nat,val){
+  const vid=String(vesselId);
+  if(!vesselStats[vid]) vesselStats[vid]={};
+  if(!vesselStats[vid][rank]) vesselStats[vid][rank]={};
+  vesselStats[vid][rank][nat]=val;
+  // 0이면 삭제
+  if(val===0) delete vesselStats[vid][rank][nat];
+  if(vesselStats[vid][rank]&&Object.keys(vesselStats[vid][rank]).length===0) delete vesselStats[vid][rank];
+}
+
+let managers=[
+  {id:1,name:"Kim Sung-ho",email:"skim@jsm.com",phone:"+82-10-1234-5678",position:"Senior Manager"},
+  {id:2,name:"Lee Ji-yeon",email:"jylee@jsm.com",phone:"+82-10-2345-6789",position:"Manager"},
+  {id:3,name:"Park Hyun-woo",email:"hwpark@jsm.com",phone:"+82-10-3456-7890",position:"Manager"},
+  {id:4,name:"Choi Min-seo",email:"mschoi@jsm.com",phone:"+82-10-4567-8901",position:"Assistant Manager"},
+];
+let companys=[
+{id:1,name:"CIDO",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:2,name:"Coastal",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:3,name:"JIE SHENG",country:"TAIWAN",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:4,name:"STX SUN ACE",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"HGM"},
+{id:5,name:"TOSCO",country:"JAPAN",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:6,name:"SAMBU",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:7,name:"Fuyo Kaiun",country:"JAPAN",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:8,name:"IMS",country:"JAPAN",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:9,name:"INFICESS",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:10,name:"SEJUL",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:11,name:"WSM",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:12,name:"PANSTAR",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"HGM"},
+{id:13,name:"SAEHAN",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"HGM"},
+{id:14,name:"FORTUNE",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:15,name:"BS",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:17,name:"MSSM",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:18,name:"AKI",country:"JAPAN",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:19,name:"WELLCHAIN",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"BJM"},
+{id:20,name:"SANGJI",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:21,name:"DORIKO",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:22,name:"SM LEADER",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"HGM"},
+{id:23,name:"MAGELLAN",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:24,name:"ILSHIN",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:25,name:"W OCEAN",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:26,name:"KMTC",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active"},
+{id:27,name:"HANA",country:"KOREA",contact:"",email:"",phone:"",managerId:0,status:"active",idAgent:"HGM"},
+{id:28,name:"DORVAL",country:"JAPAN",contact:"",email:"",phone:"",managerId:0,status:"active"}
+];
+let vessels=[
+{id:1,name:"DREAM ANGEL",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:2,name:"DREAM BEAUTY",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:3,name:"DREAM DIAMOND",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:4,name:"DREAM DIVA",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:5,name:"DREAM JASMINE",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:6,name:"DREAM ORCHID",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:7,name:"SPRING SKY",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:8,name:"SPRING WIND",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:9,name:"GRAND QUEST",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:10,name:"GOLD ESTRELLA",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:11,name:"GRAND EAGLE",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:12,name:"GRAND VENUS",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:13,name:"GRAND ORION",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:14,name:"FORTUNE BELL",imo:"",type:"",flag:"",grt:0,companyId:1,status:"active"},
+{id:15,name:"COASTAL",imo:"",type:"",flag:"",grt:0,companyId:2,status:"active"},
+{id:16,name:"CONCORD SERENITY",imo:"",type:"",flag:"",grt:0,companyId:3,status:"active"},
+{id:17,name:"CONCORD BREEZE",imo:"",type:"",flag:"",grt:0,companyId:3,status:"active"},
+{id:18,name:"OCEAN CRYSTAL",imo:"",type:"",flag:"",grt:0,companyId:3,status:"active"},
+{id:19,name:"ANGEL 101",imo:"",type:"",flag:"",grt:0,companyId:3,status:"active"},
+{id:20,name:"SUN GRACE",imo:"",type:"",flag:"",grt:0,companyId:4,status:"active"},
+{id:21,name:"SUN VESTA",imo:"",type:"",flag:"",grt:0,companyId:4,status:"active"},
+{id:22,name:"SUN EASTERN",imo:"",type:"",flag:"",grt:0,companyId:4,status:"active"},
+{id:23,name:"ENY",imo:"",type:"",flag:"",grt:0,companyId:4,status:"active"},
+{id:24,name:"S MERCURY",imo:"",type:"",flag:"",grt:0,companyId:4,status:"active"},
+{id:25,name:"AKAGISAN",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:26,name:"CAPE ADVANCE",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:27,name:"GLOBAL PROSPERITY",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:28,name:"HBIS",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:29,name:"HYUNDAI DANGJIN",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:30,name:"IRON PILBARA",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:31,name:"IRON SOUTHERN CROSS",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:32,name:"LUNA HORIZON",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:33,name:"NSU WELFARE",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:34,name:"NSU XANADU",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:35,name:"ORE SAO LUIS",imo:"",type:"",flag:"",grt:0,companyId:5,status:"active"},
+{id:36,name:"PACIFIC SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:37,name:"SUNRISE SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:38,name:"GALAXY SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:39,name:"GIANT SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:40,name:"LOTUS SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:41,name:"INFINITY SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:42,name:"ROYAL SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:43,name:"RISING SAMBU",imo:"",type:"",flag:"",grt:0,companyId:6,status:"active"},
+{id:44,name:"FLORA EXPRESS",imo:"",type:"",flag:"",grt:0,companyId:7,status:"active"},
+{id:45,name:"RICH HARVEST",imo:"",type:"",flag:"",grt:0,companyId:7,status:"active"},
+{id:46,name:"RICH RAINBOW",imo:"",type:"",flag:"",grt:0,companyId:7,status:"active"},
+{id:47,name:"CHEMROAD HAYA",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:48,name:"CHEMROAD NEXUS",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:49,name:"CHEMROAD QUEEN",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:50,name:"CHEMROAD QUEST",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:51,name:"CHEMROAD SIRIUS",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:52,name:"CHEMROAD ZENITH",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:53,name:"CHEMROAD KAIA",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:54,name:"CHEMROAD WING",imo:"",type:"",flag:"",grt:0,companyId:8,status:"active"},
+{id:55,name:"ROYAL CRYSTAL 7",imo:"",type:"",flag:"",grt:0,companyId:9,status:"active"},
+{id:56,name:"SUN FREESIA",imo:"",type:"",flag:"",grt:0,companyId:9,status:"active"},
+{id:57,name:"SUN DAHILA",imo:"",type:"",flag:"",grt:0,companyId:9,status:"active"},
+{id:58,name:"SUN EDELWEISS",imo:"",type:"",flag:"",grt:0,companyId:9,status:"active"},
+{id:59,name:"KTS BROWN",imo:"",type:"",flag:"",grt:0,companyId:10,status:"active"},
+{id:60,name:"SUNNY QUEEN",imo:"",type:"",flag:"",grt:0,companyId:10,status:"active"},
+{id:61,name:"ASAIN GRACE",imo:"",type:"",flag:"",grt:0,companyId:11,status:"active"},
+{id:62,name:"ASAIN LILAC",imo:"",type:"",flag:"",grt:0,companyId:11,status:"active"},
+{id:63,name:"OCEAN JUPITER",imo:"",type:"",flag:"",grt:0,companyId:11,status:"active"},
+{id:64,name:"ASAIN AURORA",imo:"",type:"",flag:"",grt:0,companyId:11,status:"active"},
+{id:65,name:"WESTERN MARINE",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:66,name:"OCEAN CARRIER",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:67,name:"MERDITH VICTORY",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:68,name:"SAWASDEE THAILAND",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:69,name:"HEUNG-A JANICE",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:70,name:"HEUNG-A HOCHIMINH",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:71,name:"HEUNG-A XIAMEN",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:72,name:"HEUNG-A YOUNG",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:73,name:"HEUNG-A HAIPHONG",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:74,name:"HEUNG-A SARAH",imo:"",type:"",flag:"",grt:0,companyId:12,status:"active"},
+{id:75,name:"SAEHAN JASPER",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:76,name:"SAEHAN MIRINAE",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:77,name:"SAEHAN CARINA",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:78,name:"SAEHAN KOSTAR",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:79,name:"FIRST LION",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:80,name:"SAEHAN ASTRO",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:81,name:"CHEM LEONA",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:82,name:"SAEHAN MARINA",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:83,name:"THETIS LEONA",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:84,name:"SAEHAN OLIVIA",imo:"",type:"",flag:"",grt:0,companyId:13,status:"active"},
+{id:85,name:"FC ADONIS",imo:"",type:"",flag:"",grt:0,companyId:14,status:"active"},
+{id:86,name:"FC VIOLET",imo:"",type:"",flag:"",grt:0,companyId:14,status:"active"},
+{id:87,name:"FC GLORIA",imo:"",type:"",flag:"",grt:0,companyId:14,status:"active"},
+{id:88,name:"FORTUNE YOUNGIN",imo:"",type:"",flag:"",grt:0,companyId:14,status:"active"},
+{id:89,name:"BS HAIPHONG",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:90,name:"YN GWANGYANG",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:91,name:"YN BUSAN",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:92,name:"BS ULSAN",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:93,name:"BS DAESAN",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:94,name:"YN YEOSU",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:95,name:"YN OCEAN",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:96,name:"FORTUNE KAREN",imo:"",type:"",flag:"",grt:0,companyId:15,status:"active"},
+{id:97,name:"GREEN GAS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:98,name:"LADY GAS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:99,name:"MS ZINNIA",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:100,name:"MS SALVIA",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:101,name:"MS SHARON",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:102,name:"MS BLESS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:103,name:"MS FAVOR",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:104,name:"BELIEF GAS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:105,name:"HAPPY GAS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:106,name:"MS THANKS",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:107,name:"MS PEACE",imo:"",type:"",flag:"",grt:0,companyId:17,status:"active"},
+{id:108,name:"AZALEA",imo:"",type:"",flag:"",grt:0,companyId:18,status:"active"},
+{id:109,name:"CATTLEYA",imo:"",type:"",flag:"",grt:0,companyId:18,status:"active"},
+{id:110,name:"MS DREAM",imo:"",type:"",flag:"",grt:0,companyId:19,status:"active"},
+{id:111,name:"GOLDEN WINGS",imo:"",type:"",flag:"",grt:0,companyId:19,status:"active"},
+{id:112,name:"GOLDEN GLORY",imo:"",type:"",flag:"",grt:0,companyId:19,status:"active"},
+{id:113,name:"TAIHAI 5",imo:"",type:"",flag:"",grt:0,companyId:19,status:"active"},
+{id:114,name:"S LEADER",imo:"",type:"",flag:"",grt:0,companyId:20,status:"active"},
+{id:115,name:"KOREA VICTORY",imo:"",type:"",flag:"",grt:0,companyId:20,status:"active"},
+{id:116,name:"AH SHIN",imo:"",type:"",flag:"",grt:0,companyId:21,status:"active"},
+{id:117,name:"CY INTEROCEAN II",imo:"",type:"",flag:"",grt:0,companyId:22,status:"active"},
+{id:118,name:"FUTURE ASIA I",imo:"",type:"",flag:"",grt:0,companyId:22,status:"active"},
+{id:119,name:"DDS MARINA",imo:"",type:"",flag:"",grt:0,companyId:22,status:"active"},
+{id:120,name:"CY FRONTIER",imo:"",type:"",flag:"",grt:0,companyId:22,status:"active"},
+{id:121,name:"SD GLORIA",imo:"",type:"",flag:"",grt:0,companyId:22,status:"active"},
+{id:122,name:"STAR VOYAGER",imo:"",type:"",flag:"",grt:0,companyId:23,status:"active"},
+{id:123,name:"STAR PIONEER",imo:"",type:"",flag:"",grt:0,companyId:23,status:"active"},
+{id:124,name:"STARSHIP PEGASUS",imo:"",type:"",flag:"",grt:0,companyId:23,status:"active"},
+{id:125,name:"STAR RANGER",imo:"",type:"",flag:"",grt:0,companyId:23,status:"active"},
+{id:126,name:"ILSHIN POLARIS ROYAL",imo:"",type:"",flag:"",grt:0,companyId:24,status:"active"},
+{id:127,name:"WOOHYUN GREEN",imo:"",type:"",flag:"",grt:0,companyId:25,status:"active"},
+{id:128,name:"WOOHYUN HOPE",imo:"",type:"",flag:"",grt:0,companyId:25,status:"active"},
+{id:129,name:"WOOHYUN STAR",imo:"",type:"",flag:"",grt:0,companyId:25,status:"active"},
+{id:130,name:"WOOHYUN DREAM",imo:"",type:"",flag:"",grt:0,companyId:25,status:"active"},
+{id:131,name:"KMTC PUSAN",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:132,name:"KMTC ULSAN",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:133,name:"KMTC KEELUNG",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:134,name:"KMTC JAKARTA",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:135,name:"KMTC SHANGHAI",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:136,name:"KMTC MUMBAI",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:137,name:"KMTC DUBAI",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:138,name:"KMTC TIANJIN",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:139,name:"KMTC CHENNAI",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:140,name:"KMTC JEBEL ALI",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:141,name:"KMTC COLOMBO",imo:"",type:"",flag:"",grt:0,companyId:26,status:"active"},
+{id:142,name:"SUNNY DAHLIA",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:143,name:"SUNNY DAISY",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:144,name:"SUNNY ACACIA",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:145,name:"SUNNY ROSE",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:146,name:"SUNNY CLOVER",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:147,name:"HECAN",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:148,name:"WECAN",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:149,name:"YOUCAN",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:150,name:"KMTC YOKOHAMA",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:151,name:"KMTC DALIAN",imo:"",type:"",flag:"",grt:0,companyId:27,status:"active"},
+{id:152,name:"GOLDEN CHIE",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:153,name:"GOLDEN UNITY",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:154,name:"GOLDEN RESOLUTION",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:155,name:"GOLDEN ACE",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:156,name:"GOLDEN CREATION",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:157,name:"GOLDEN ASPIRANT",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:158,name:"GOLDEN LEADER",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:159,name:"GOLDEN SKY",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:160,name:"GOLDEN WAVE",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:161,name:"GOLDEN SAGITTARIUS",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:162,name:"GOLDEN HACHI",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:163,name:"GOLDEN MIND",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:164,name:"GOLDEN AUSTRLAIS",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:165,name:"GOLDEN AXIS",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"},
+{id:166,name:"GOLDEN PRELUDE",imo:"",type:"",flag:"",grt:0,companyId:28,status:"active"}
+];
+let vesselStats={"1":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"ID":1},"3/O":{"ID":2},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":1,"ID":2},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"2":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":2,"ID":1},"OS":{"ID":2},"1OLR":{"MM":1},"OLR":{"ID":2},"WLD":{"MM":1},"WPR":{"ID":1},"CCK":{"MM":1},"MM":{"ID":1},"D/C":{"ID":1}},"3":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1,"ID":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"4":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1,"ID":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":2,"ID":1},"OS":{"MM":1,"ID":1},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"MM":1},"WPR":{"ID":1},"CCK":{"MM":1},"MM":{"ID":1},"D/C":{"ID":1}},"5":{"C/O":{"MM":1},"2/O":{"ID":1},"3/O":{"ID":2},"C/E":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":2,"ID":1},"OS":{"ID":2},"1OLR":{"MM":1},"FTR":{"ID":1},"OLR":{"ID":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"6":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"ID":1},"3/O":{"MM":1,"ID":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":1,"ID":1},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"7":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"C/E":{"MM":1},"1/E":{"ID":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":1,"ID":1},"WLD":{"ID":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"8":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1,"ID":1},"1/E":{"ID":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"ID":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"9":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"ID":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":1,"ID":2},"OS":{"MM":2},"FTR":{"MM":1},"OLR":{"MM":3},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"10":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"FTR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"11":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"12":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"13":{"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":2},"1/E":{"MM":1},"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"1OLR":{"MM":1},"OLR":{"MM":1},"WLD":{"MM":1},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"14":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"15":{"BSN":{"MM":23},"AB":{"MM":125},"1OLR":{"MM":26},"OLR":{"MM":77},"CCK":{"MM":6},"MM":{"MM":7}},"16":{"FTR":{"MM":1},"OLR":{"MM":1}},"17":{"2/O":{"MM":1},"AB":{"MM":1},"OLR":{"MM":1}},"18":{"AB":{"MM":2}},"19":{"OLR":{"MM":1}},"20":{"C/O":{"MM":1},"1/E":{"ID":1},"2/E":{"MM":1},"3/E":{"ID":1},"AB":{"MM":1}},"21":{"1OLR":{"ID":1}},"22":{"2/O":{"ID":1},"3/O":{"ID":1},"AB":{"ID":1}},"23":{"1/E":{"ID":1},"WPR":{"MM":1}},"24":{"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"AB":{"MM":1},"1OLR":{"MM":1},"OLR":{"MM":1}},"25":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"26":{"2/O":{"MM":1},"3/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"27":{"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":5},"OLR":{"MM":3},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"28":{"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"29":{"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":5},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"30":{"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"31":{"2/O":{"MM":1},"3/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":3},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"32":{"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":3},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"33":{"2/O":{"MM":1},"3/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"34":{"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1}},"35":{"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"36":{"2/O":{"ID":2},"3/O":{"ID":1},"2/E":{"ID":2},"CCK":{"ID":1}},"37":{"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":1,"ID":1}},"38":{"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"MM":1,"ID":2},"1OLR":{"ID":1},"CCK":{"ID":1}},"39":{"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":2}},"40":{"2/O":{"ID":1},"3/O":{"ID":2},"2/E":{"MM":1,"ID":1},"CCK":{"MM":1}},"41":{"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"MM":1,"ID":3}},"42":{"2/O":{"ID":2},"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"43":{"2/O":{"ID":2},"3/O":{"ID":1},"2/E":{"MM":1,"ID":1}},"44":{"MST":{"KR":1},"C/O":{"KR":1},"2/O":{"MM":2},"3/O":{"MM":1},"C/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":2},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1},"E/C":{"MM":1}},"45":{"MST":{"KR":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1},"E/C":{"MM":1}},"46":{"1/E":{"MM":1}},"47":{"2/O":{"MM":2},"3/O":{"MM":1},"2/E":{"MM":2},"3/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"48":{"2/O":{"MM":2},"3/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"49":{"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"50":{"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"51":{"2/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"52":{"2/O":{"MM":2},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1},"E/C":{"MM":1}},"53":{"2/O":{"MM":2},"3/O":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1},"D/C":{"MM":1},"E/C":{"MM":1}},"54":{"2/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"55":{"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"1OLR":{"ID":1},"OLR":{"MM":1},"D/C":{"ID":1},"E/C":{"ID":1}},"56":{"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":2},"CCK":{"ID":1}},"57":{"C/O":{"ID":1},"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":1}},"58":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"AB":{"MM":2},"1OLR":{"MM":1}},"59":{"2/O":{"ID":1},"3/O":{"ID":2},"AB":{"MM":2},"OS":{"MM":1},"OLR":{"MM":2}},"60":{"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"AB":{"MM":1},"CCK":{"MM":1}},"61":{"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"3/E":{"ID":1}},"62":{"C/O":{"ID":1},"2/O":{"ID":2},"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"63":{"C/O":{"ID":1},"2/O":{"ID":2},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"64":{"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"65":{"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"FTR":{"MM":1},"OLR":{"MM":3},"MM":{"MM":1}},"66":{"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"FTR":{"MM":1},"OLR":{"MM":3},"MM":{"MM":1}},"67":{"1/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"FTR":{"MM":1},"OLR":{"MM":3},"MM":{"MM":1}},"68":{"3/E":{"ID":1}},"69":{"3/O":{"ID":1},"3/E":{"ID":1}},"70":{"3/O":{"ID":1}},"71":{"2/E":{"ID":1},"OLR":{"ID":1}},"72":{"1/E":{"ID":1},"OLR":{"ID":1}},"73":{"1/E":{"ID":1}},"74":{"1/E":{"ID":1},"OLR":{"ID":1}},"75":{"2/O":{"ID":1},"3/O":{"ID":2},"1/E":{"ID":1},"3/E":{"ID":1},"OS":{"ID":1},"1OLR":{"ID":1},"E/C":{"ID":1}},"76":{"C/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1}},"77":{"C/O":{"ID":1},"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"AB":{"ID":1},"CCK":{"ID":1}},"78":{"3/O":{"ID":2},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"1OLR":{"ID":1},"CCK":{"ID":1}},"79":{"2/O":{"ID":1},"3/O":{"ID":2},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"1OLR":{"ID":1},"MM":{"ID":1}},"80":{"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"CCK":{"ID":1}},"81":{"C/O":{"ID":1},"3/O":{"ID":2},"1/E":{"ID":1},"3/E":{"ID":1}},"82":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"AB":{"ID":2},"OS":{"ID":1},"WPR":{"ID":1},"CCK":{"ID":1},"MM":{"ID":1}},"83":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"ID":1},"OS":{"ID":2},"1OLR":{"ID":1},"WPR":{"ID":1},"MM":{"ID":1}},"84":{"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"85":{"OS":{"ID":1}},"86":{"1/E":{"ID":1},"3/E":{"ID":1}},"87":{"3/O":{"ID":1}},"88":{"1/E":{"ID":1}},"89":{"AB":{"ID":1},"OS":{"ID":1},"OLR":{"ID":1},"CCK":{"ID":1}},"90":{"3/O":{"ID":1},"1/E":{"ID":1},"1OLR":{"ID":1},"CCK":{"ID":1}},"91":{"2/O":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"1OLR":{"ID":1}},"92":{"1/E":{"ID":1},"BSN":{"ID":1},"OS":{"ID":1},"OLR":{"ID":1}},"93":{"2/O":{"ID":1},"2/E":{"ID":1},"CCK":{"ID":1}},"94":{"3/O":{"ID":2},"1/E":{"ID":1},"2/E":{"ID":1},"OLR":{"ID":1}},"95":{"1/E":{"ID":1}},"96":{"1/E":{"ID":1}},"97":{"2/O":{"ID":1},"2/E":{"ID":1},"AB":{"ID":2},"1OLR":{"ID":1},"OLR":{"ID":1}},"98":{"2/E":{"ID":1},"AB":{"ID":1},"WPR":{"ID":1},"CCK":{"ID":1}},"99":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"3/E":{"ID":1},"AB":{"ID":3},"OLR":{"ID":2}},"100":{"C/O":{"ID":1},"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"ID":2},"OLR":{"ID":1},"WPR":{"ID":1},"CCK":{"ID":1}},"101":{"C/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"OLR":{"ID":1},"WPR":{"ID":1},"CCK":{"ID":1}},"102":{"C/O":{"ID":1},"3/O":{"ID":1},"BSN":{"ID":1},"AB":{"ID":2},"OLR":{"ID":1},"WPR":{"ID":1}},"103":{"2/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"OLR":{"ID":2},"WPR":{"ID":1},"CCK":{"ID":1}},"104":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"AB":{"ID":2},"CCK":{"ID":1},"D/C":{"ID":1}},"105":{"AB":{"ID":1},"CCK":{"ID":1}},"106":{"C/O":{"ID":1},"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"ID":1},"OLR":{"ID":1},"WPR":{"ID":1},"CCK":{"ID":1}},"107":{"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"ID":1},"AB":{"ID":2},"CCK":{"ID":1},"D/C":{"ID":1}},"108":{"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"OLR":{"MM":2},"CCK":{"MM":1}},"109":{"MST":{"MM":1},"C/O":{"MM":1},"2/O":{"MM":1},"3/O":{"MM":1},"C/E":{"MM":1},"1/E":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":2},"OLR":{"MM":2},"CCK":{"MM":1}},"110":{"2/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":1,"ID":2},"1OLR":{"MM":1},"OLR":{"ID":1},"CCK":{"MM":1}},"111":{"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"ID":1},"1OLR":{"ID":1},"CCK":{"MM":1}},"112":{"2/O":{"ID":1},"3/O":{"ID":1},"2/E":{"ID":1},"BSN":{"MM":1},"AB":{"ID":3},"1OLR":{"MM":1},"OLR":{"MM":1,"ID":1},"CCK":{"MM":1}},"113":{"3/O":{"ID":1}},"114":{"BSN":{"MM":1},"AB":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":1}},"115":{"BSN":{"MM":1},"AB":{"MM":4},"1OLR":{"MM":1},"OLR":{"MM":1}},"116":{"AB":{"MM":1},"OS":{"MM":1},"OLR":{"MM":1},"MM":{"MM":1}},"117":{"AB":{"MM":1}},"118":{"C/O":{"ID":1},"2/O":{"MM":1},"1/E":{"ID":1},"2/E":{"ID":1},"3/E":{"ID":1}},"119":{"2/E":{"MM":1},"3/E":{"ID":1}},"120":{"OLR":{"MM":1}},"121":{"3/O":{"ID":1},"1/E":{"ID":1}},"122":{"AB":{"MM":2},"1OLR":{"MM":1},"OLR":{"MM":1}},"123":{"AB":{"MM":1},"OLR":{"MM":1},"WPR":{"MM":1}},"124":{"AB":{"MM":1},"OS":{"MM":1},"OLR":{"MM":1}},"125":{"BSN":{"MM":1}},"126":{"2/O":{"MM":1},"3/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"AB":{"MM":3},"OLR":{"MM":3}},"127":{"1/E":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"OLR":{"MM":2},"WPR":{"MM":1},"MM":{"MM":1}},"128":{"C/O":{"MM":1},"BSN":{"MM":1},"OS":{"MM":1},"1OLR":{"MM":1},"FTR":{"MM":1},"OLR":{"MM":1},"CCK":{"MM":1}},"129":{"C/O":{"MM":1},"1/E":{"MM":1},"CCK":{"MM":1},"MM":{"MM":1}},"130":{"1/E":{"MM":1},"AB":{"MM":1},"OS":{"MM":1},"WPR":{"MM":1}},"131":{"CCK":{"MM":1}},"132":{"AB":{"MM":1},"OS":{"MM":2}},"133":{"1OLR":{"MM":1}},"134":{"1/E":{"MM":1},"AB":{"MM":1},"WPR":{"MM":1}},"135":{"CCK":{"MM":1}},"136":{"WPR":{"MM":1},"2CK":{"MM":1}},"137":{"AB":{"MM":1},"MM":{"MM":1}},"138":{"AB":{"MM":1}},"139":{"CCK":{"MM":1},"MM":{"MM":1}},"140":{"AB":{"MM":2},"OS":{"MM":1}},"141":{"OLR":{"MM":1}},"142":{"2/E":{"MM":1},"AB":{"MM":1},"OS":{"MM":1},"WPR":{"MM":1},"E/C":{"MM":1}},"143":{"2/E":{"MM":1},"3/E":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"WPR":{"MM":2},"E/C":{"MM":1}},"144":{"1/E":{"MM":1},"3/E":{"MM":1},"AB":{"MM":1},"OS":{"MM":1},"1OLR":{"MM":1},"WPR":{"MM":2},"E/C":{"MM":1}},"145":{"2/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":1},"1OLR":{"MM":1},"WPR":{"MM":3},"CCK":{"MM":1},"E/C":{"MM":1}},"146":{"2/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":1},"OLR":{"MM":1},"WPR":{"MM":2},"E/C":{"MM":1}},"147":{"3/O":{"MM":1},"1/E":{"MM":1},"3/E":{"ID":1},"BSN":{"MM":1},"AB":{"MM":1,"ID":1},"OS":{"MM":2},"1OLR":{"MM":1},"OLR":{"ID":1},"WPR":{"ID":1},"CCK":{"MM":1}},"148":{"2/E":{"MM":1},"3/E":{"MM":1},"AB":{"MM":1},"OS":{"MM":1}},"149":{"2/O":{"MM":1},"2/E":{"MM":1},"3/E":{"MM":1},"AB":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":1},"WPR":{"MM":1}},"150":{"2/O":{"MM":1},"3/O":{"ID":1},"1/E":{"MM":1},"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":2},"OS":{"MM":2},"WPR":{"MM":1},"MM":{"MM":1}},"151":{"C/O":{"MM":1},"2/O":{"ID":1},"3/O":{"ID":1},"1/E":{"ID":1},"AB":{"MM":2},"OS":{"MM":1},"WPR":{"MM":1},"MM":{"MM":1}},"152":{"3/O":{"MM":1},"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":3},"CCK":{"MM":1},"MM":{"MM":1}},"153":{"2/E":{"MM":1},"BSN":{"MM":1},"PM":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"FTR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":2}},"154":{"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"155":{"2/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"156":{"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"157":{"1/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"158":{"2/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"159":{"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":2}},"160":{"C/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"161":{"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}},"162":{"C/O":{"MM":1},"2/O":{"MM":1},"3/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"163":{"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"164":{"2/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"165":{"2/O":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1}},"166":{"1/E":{"MM":1},"BSN":{"MM":1},"AB":{"MM":3},"OS":{"MM":3},"1OLR":{"MM":1},"OLR":{"MM":2},"CCK":{"MM":1},"MM":{"MM":1},"E/C":{"MM":1}}};
+let crew=[];
+let certs=[];
+const RANKS=["MST","C/O","2/O","3/O","C/E","1/E","2/E","3/E","ETR","BSN","PM","AB","OS","1OLR","FTR","OLR","WLD","WPR","CCK","2CK","MM","D/B","E/B","D/C","E/C"];
+const CERT_TYPES=["STCW Basic Safety","GMDSS GOC","Master CoC","Chief Officer CoC","2nd Officer CoC","3rd Officer CoC","Chief Engineer CoC","2nd Engineer CoC","3rd Engineer CoC","4th Engineer CoC","ECDIS","Medical Certificate","Seafarer Medical","Dangerous Goods","Tanker Safety"];
+const VESSEL_TYPES=["Bulk Carrier","Container","Tanker","General Cargo","LNG Carrier","Car Carrier","Ro-Ro","Passenger"];
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function daysUntil(d){return Math.ceil((new Date(d)-new Date())/(1000*60*60*24));}
+function certStatus(exp){const d=daysUntil(exp);if(d<0)return"expired";if(d<90)return"expiring";return"valid";}
+function certBadge(exp){const s=certStatus(exp),d=daysUntil(exp);if(s==="expired")return'<span class="badge badge-red">● Expired</span>';if(s==="expiring")return`<span class="badge badge-yellow">● Expiring (D-${d})</span>`;return'<span class="badge badge-green">● Valid</span>';}
+function statusBadge(s){if(s==="onboard")return'<span class="badge badge-blue">● Onboard</span>';if(s==="leave")return'<span class="badge badge-gray">● On Leave</span>';if(s==="active")return'<span class="badge badge-green">● Active</span>';return`<span class="badge badge-gray">${s}</span>`;}
+function natTag(n){if(n==="Myanmar")return'<span class="tag tag-mm">MM</span>';if(n==="Korea")return'<span class="tag tag-kr">KR</span>';return'<span class="tag tag-id">ID</span>';}
+function rankShort(r){return r?r.split(" ").map(w=>w[0]).join(""):"??";}
+function getVessel(id){return vessels.find(v=>v.id===id);}
+function getCompany(id){return companys.find(s=>s.id===id);}
+function getManager(id){return managers.find(m=>m.id===id);}
+function calcPay(c){const ot=c.overtimeRate*208;return{base:c.baseSalary,ot:Math.round(ot),allowances:c.allowances,deductions:c.deductions,net:Math.round(c.baseSalary+ot+c.allowances-c.deductions)};}
+function nextId(arr){return arr.length>0?Math.max(...arr.map(x=>x.id))+1:1;}
+
+let currentTab="dashboard";
+function switchTab(tab){
+  currentTab=tab;
+  const tabs=["dashboard","companys","vessels","certificates","crewstatus"];
+  document.querySelectorAll(".nav-btn").forEach((btn,i)=>btn.classList.toggle("active",tabs[i]===tab));
+  tabs.forEach(t=>document.getElementById("tab-"+t).classList.add("hidden"));
+  document.getElementById("tab-"+tab).classList.remove("hidden");
+  ({dashboard:renderDashboard,companys:renderCompanys,vessels:renderVessels,certificates:renderCertificates,crewstatus:renderCrewStatus})[tab]();
+}
+
+function renderDashboard(){
+  const expiring=certs.filter(c=>certStatus(c.expiryDate)!=="valid");
+  const onboard=getAllOnboard();
+  const onLeave=0;
+  const stats=[
+    {label:"Total Crew",value:getAllOnboard(),sub:"members",color:"#2563eb",bg:"#dbeafe"},
+    {label:"Onboard",value:onboard,sub:"members",color:"#16a34a",bg:"#dcfce7"},
+    {label:"On Leave",value:onLeave,sub:"members",color:"#ca8a04",bg:"#fef9c3"},
+    {label:"Companies",value:companys.length,sub:"companies",color:"#7c3aed",bg:"#f3e8ff"},
+    {label:"Vessels",value:vessels.length,sub:"ships",color:"#0891b2",bg:"#cffafe"},
+    {label:"Cert Alerts",value:expiring.length,sub:"items",color:"#dc2626",bg:"#fee2e2"},
+  ];
+  document.getElementById("tab-dashboard").innerHTML=`
+    <div>
+      <div style="margin-bottom:24px;"><h1 class="page-title">Dashboard</h1><p class="page-sub">JSM International — Crew Management Overview</p></div>
+      ${expiring.length>0?`<div class="alert-box" style="margin-bottom:20px;">⚠️ <strong>${expiring.length} certificate(s)</strong> are expired or expiring within 90 days.</div>`:""}
+      <div class="stat-grid">
+        ${stats.map(s=>`<div class="stat-card" style="min-width:140px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:36px;height:36px;border-radius:8px;background:${s.bg};display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;border-radius:50%;background:${s.color};"></div></div>
+            <span style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">${s.label}</span>
+          </div>
+          <div style="font-size:30px;font-weight:700;color:${s.color};font-family:'IBM Plex Mono',monospace;line-height:1;">${s.value}<span style="font-size:12px;font-weight:400;color:#94a3b8;margin-left:5px;">${s.sub}</span></div>
+        </div>`).join("")}
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
+        <!-- Company Summary Table -->
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="padding:16px 20px 12px;border-bottom:1px solid #f1f5f9;">
+            <div class="section-title" style="margin-bottom:0;">Company Crew Summary</div>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Company</th>
+              <th style="text-align:center;">Vessels</th>
+              <th style="text-align:center;">Myanmar</th>
+              <th style="text-align:center;background:#fef3c7;color:#92400e;">ID (BJM)</th>
+              <th style="text-align:center;background:#ede9fe;color:#6d28d9;">ID (HGM)</th>
+              <th style="text-align:center;">Korea</th>
+              <th style="text-align:center;">Total Onboard</th>
+            </tr></thead>
+            <tbody>
+              ${[...companys].sort((a,b)=>{
+                if(a.name==="Coastal") return 1;
+                if(b.name==="Coastal") return -1;
+                const aVessels=vessels.filter(v=>v.companyId===a.id);
+                const bVessels=vessels.filter(v=>v.companyId===b.id);
+                const aCount=crew.filter(c=>aVessels.find(v=>v.id===c.vesselId)&&c.status==="onboard").length;
+                const bCount=crew.filter(c=>bVessels.find(v=>v.id===c.vesselId)&&c.status==="onboard").length;
+                return bCount-aCount;
+              }).map(s=>{
+                const myVessels=vessels.filter(v=>v.companyId===s.id);
+                const mmCount=getCompanyNat(s.id,"MM");
+                const idCount=getCompanyNat(s.id,"ID");
+                const krCount=getCompanyNat(s.id,"KR");
+                const bjmCount=s.idAgent==="BJM"?idCount:null;
+                const hgmCount=s.idAgent==="HGM"?idCount:null;
+                const total=getCompanyOnboard(s.id);
+                return`<tr class="row-hover">
+                  <td style="font-weight:600;color:#0f172a;">${s.name}</td>
+                  <td style="text-align:center;"><span class="badge badge-blue">${myVessels.length}</span></td>
+                  <td style="text-align:center;font-weight:600;color:#1d4ed8;font-family:'IBM Plex Mono',monospace;">${mmCount||"—"}</td>
+                  <td style="text-align:center;background:#fefce8;font-weight:600;color:#92400e;font-family:'IBM Plex Mono',monospace;">${bjmCount!==null?(bjmCount||"—"):"—"}</td>
+                  <td style="text-align:center;background:#f5f3ff;font-weight:600;color:#6d28d9;font-family:'IBM Plex Mono',monospace;">${hgmCount!==null?(hgmCount||"—"):"—"}</td>
+                  <td style="text-align:center;font-weight:600;color:#16a34a;font-family:'IBM Plex Mono',monospace;">${krCount||"—"}</td>
+                  <td style="text-align:center;font-weight:700;color:#16a34a;font-family:'IBM Plex Mono',monospace;font-size:15px;">${total}</td>
+                </tr>`;
+              }).join("")}
+              <tr style="background:#f8fafc;border-top:2px solid #e2e8f0;">
+                <td style="font-weight:700;color:#0f172a;">Total</td>
+                <td style="text-align:center;font-weight:700;font-family:'IBM Plex Mono',monospace;">${vessels.length}</td>
+                <td style="text-align:center;font-weight:700;color:#1d4ed8;font-family:'IBM Plex Mono',monospace;">${getAllNat("MM")}</td>
+                <td style="text-align:center;background:#fefce8;font-weight:700;color:#92400e;font-family:'IBM Plex Mono',monospace;">${Object.entries(vesselStats).reduce((sum,[vid,s])=>{const v=vessels.find(vv=>String(vv.id)===vid);const co=v?companys.find(cc=>cc.id===v.companyId):null;return sum+(co&&co.idAgent==="BJM"?Object.values(s).reduce((ss,n)=>ss+(n.ID||0),0):0);},0)}</td>
+                <td style="text-align:center;background:#f5f3ff;font-weight:700;color:#6d28d9;font-family:'IBM Plex Mono',monospace;">${Object.entries(vesselStats).reduce((sum,[vid,s])=>{const v=vessels.find(vv=>String(vv.id)===vid);const co=v?companys.find(cc=>cc.id===v.companyId):null;return sum+(co&&co.idAgent==="HGM"?Object.values(s).reduce((ss,n)=>ss+(n.ID||0),0):0);},0)}</td>
+                <td style="text-align:center;font-weight:700;color:#16a34a;font-family:'IBM Plex Mono',monospace;">${getAllNat("KR")}</td>
+                <td style="text-align:center;font-weight:700;color:#16a34a;font-family:'IBM Plex Mono',monospace;font-size:15px;">${onboard}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Certificate Alerts -->
+        <div class="card">
+          <div class="section-title">Certificate Alerts</div>
+          ${expiring.length===0?`<div style="color:#94a3b8;font-size:13px;text-align:center;padding:20px 0;">✅ All certificates are valid</div>`:
+            expiring.map(cert=>{const owner=crew.find(c=>c.id===cert.crewId);const d=daysUntil(cert.expiryDate);return`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+              <div style="width:38px;height:38px;border-radius:9px;background:${d<0?"#fee2e2":"#fef9c3"};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${d<0?"#dc2626":"#ca8a04"};">${d<0?"EXP":"D-"+d}</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#0f172a;">${owner?.name}</div><div style="font-size:11px;color:#94a3b8;">${cert.type}</div></div>
+              <div style="font-size:11px;color:#94a3b8;font-family:'IBM Plex Mono',monospace;">${cert.expiryDate}</div></div>`;}).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCompanys(){
+  document.getElementById("tab-companys").innerHTML=`
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+        <div><h1 class="page-title">Companys</h1><p class="page-sub">${companys.length} companies registered</p></div>
+        <button class="btn-primary" onclick="openAddCompanyModal()">+ Add Company</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Company</th><th>Country</th><th>Contact</th><th>Email</th><th>Phone</th><th>JSM Manager</th><th>Vessels</th><th>Status</th><th></th></tr></thead>
+        <tbody>${[...companys].sort((a,b)=>{
+          if(a.name==="Coastal") return 1;
+          if(b.name==="Coastal") return -1;
+          const aV=vessels.filter(v=>v.companyId===a.id);
+          const bV=vessels.filter(v=>v.companyId===b.id);
+          const aC=crew.filter(c=>aV.find(v=>v.id===c.vesselId)&&c.status==="onboard").length;
+          const bC=crew.filter(c=>bV.find(v=>v.id===c.vesselId)&&c.status==="onboard").length;
+          return bC-aC;
+        }).map(s=>{const mgr=getManager(s.managerId);const vCount=vessels.filter(v=>v.companyId===s.id).length;return`<tr class="row-hover" style="cursor:pointer;" onclick="openCompanyPanel(${s.id})">
+          <td style="font-weight:600;color:#0f172a;">${s.name}</td><td style="color:#64748b;">${s.country}</td><td>${s.contact}</td>
+          <td style="color:#2563eb;font-size:12px;">${s.email}</td><td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#64748b;">${s.phone}</td>
+          <td><span class="badge badge-blue">${mgr?mgr.name:"—"}</span></td><td style="font-weight:600;color:#2563eb;">${vCount}</td>
+          <td>${statusBadge(s.status)}</td>
+          <td onclick="event.stopPropagation()"><button class="btn-ghost-sm" onclick="openEditCompanyModal(${s.id})">Edit</button></td></tr>`;}).join("")}
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+function openCompanyPanel(id){
+  const s=companys.find(x=>x.id===id);const mgr=getManager(s.managerId);
+  const myVessels=vessels.filter(v=>v.companyId===id);const myCrew=crew.filter(c=>myVessels.find(v=>v.id===c.vesselId));
+  document.getElementById("panel-name").textContent=s.name;
+  document.getElementById("panel-sub").textContent=s.country;
+  document.getElementById("panel-content").innerHTML=`
+    <div class="section-title">Company Info</div>
+    ${[["Contact",s.contact],["Email",s.email],["Phone",s.phone],["JSM Manager",mgr?mgr.name:"—"]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:12px;color:#94a3b8;font-weight:500;">${k}</span><span style="font-size:13px;color:#0f172a;font-weight:500;">${v}</span></div>`).join("")}
+    <div style="margin-top:20px;" class="section-title">Vessels (${myVessels.length})</div>
+    ${myVessels.map(v=>`<div style="padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:8px;border:1px solid #e2e8f0;"><div style="font-size:13px;font-weight:600;color:#0f172a;">${v.name}</div><div style="font-size:11px;color:#94a3b8;margin-top:2px;">${v.type} · IMO: ${v.imo}</div></div>`).join("")}
+    <div style="margin-top:20px;" class="section-title">Crew (${myCrew.length})</div>
+    ${myCrew.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;">${natTag(c.nationality)}<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#0f172a;">${c.name}</div><div style="font-size:11px;color:#94a3b8;">${c.rank}</div></div>${statusBadge(c.status)}</div>`).join("")}`;
+  document.getElementById("side-panel-overlay").classList.remove("hidden");
+}
+
+function soForm(s){return`
+  <div class="grid2" style="margin-bottom:16px;">
+    <div><div class="form-label">Company Name</div><input class="input-field" id="so-name" value="${s?s.name:""}"></div>
+    <div><div class="form-label">Country</div><input class="input-field" id="so-country" value="${s?s.country:"South Korea"}"></div>
+    <div><div class="form-label">Contact Person</div><input class="input-field" id="so-contact" value="${s?s.contact:""}"></div>
+    <div><div class="form-label">Email</div><input class="input-field" id="so-email" type="email" value="${s?s.email:""}"></div>
+    <div><div class="form-label">Phone</div><input class="input-field" id="so-phone" value="${s?s.phone:""}"></div>
+    <div><div class="form-label">JSM Manager</div><select class="input-field" id="so-manager">${managers.map(m=>`<option value="${m.id}" ${s&&m.id===s.managerId?"selected":""}>${m.name}</option>`).join("")}</select></div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="${s?`updateCompany(${s.id})`:"saveCompany()"}">${s?"Update":"Save"}</button></div>`;}
+
+function openAddCompanyModal(){document.getElementById("modal-title").textContent="Add Company";document.getElementById("modal-content").innerHTML=soForm(null);document.getElementById("modal-overlay").classList.remove("hidden");}
+function openEditCompanyModal(id){const s=companys.find(x=>x.id===id);document.getElementById("modal-title").textContent="Edit Company";document.getElementById("modal-content").innerHTML=soForm(s);document.getElementById("modal-overlay").classList.remove("hidden");}
+function saveCompany(){companys.push({id:nextId(companys),name:document.getElementById("so-name").value,country:document.getElementById("so-country").value,contact:document.getElementById("so-contact").value,email:document.getElementById("so-email").value,phone:document.getElementById("so-phone").value,managerId:parseInt(document.getElementById("so-manager").value),status:"active"});closeModal();renderCompanys();renderDashboard();}
+function updateCompany(id){const idx=companys.findIndex(x=>x.id===id);companys[idx]={...companys[idx],name:document.getElementById("so-name").value,country:document.getElementById("so-country").value,contact:document.getElementById("so-contact").value,email:document.getElementById("so-email").value,phone:document.getElementById("so-phone").value,managerId:parseInt(document.getElementById("so-manager").value)};closeModal();renderCompanys();renderDashboard();}
+
+let vesselFilterCompany="all";
+let vesselExpandedCompanies = new Set();
+
+function toggleVesselCompany(id){
+  if(vesselExpandedCompanies.has(id)) vesselExpandedCompanies.delete(id);
+  else vesselExpandedCompanies.add(id);
+  renderVessels();
+}
+
+function renderVessels(){
+  const onboardCrew = crew.filter(c=>c.status==="onboard");
+
+  // 선사 목록 (선택된 경우 해당 선사만)
+  const companyList = vesselFilterCompany==="none"
+    ? companys
+    : vesselFilterCompany==="all"
+    ? companys
+    : companys.filter(c=>c.id===parseInt(vesselFilterCompany));
+
+  // 특정 선사 선택 시 자동 펼치기
+  if(vesselFilterCompany!=="none" && vesselFilterCompany!=="all"){
+    vesselExpandedCompanies.add(parseInt(vesselFilterCompany));
+  }
+
+  let html = '<div>';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">';
+  html += '<div><h1 class="page-title">Vessels</h1>';
+  const totalShown = vesselFilterCompany==="none" ? 0 : vesselFilterCompany==="all" ? vessels.length : vessels.filter(v=>v.companyId===parseInt(vesselFilterCompany)).length;
+  html += '<p class="page-sub">'+(vesselFilterCompany==="none"?"Select a company to view vessels":totalShown+" vessels shown")+'</p></div>';
+  html += '<button class="btn-primary" onclick="openAddVesselModal()">+ Add Vessel</button></div>';
+
+  // 필터
+  html += '<div class="filters" style="margin-bottom:20px;">';
+  html += '<select class="input-field" style="width:220px;" onchange="vesselFilterCompany=this.value;renderVessels()">';
+  html += '<option value="none">— Select Company —</option>';
+  html += '<option value="all"'+(vesselFilterCompany==="all"?" selected":"")+'>All Companies</option>';
+  companys.forEach(s=>{ html += '<option value="'+s.id+'"'+(vesselFilterCompany==s.id?" selected":"")+'>'+s.name+'</option>'; });
+  html += '</select>';
+  if(vesselFilterCompany==="all"){
+    html += '<button class="btn-ghost" style="margin-left:8px;font-size:12px;" onclick="vesselExpandedCompanies=new Set(companys.map(c=>c.id));renderVessels()">Expand All</button>';
+    html += '<button class="btn-ghost" style="font-size:12px;" onclick="vesselExpandedCompanies=new Set();renderVessels()">Collapse All</button>';
+  }
+  html += '</div>';
+
+  if(vesselFilterCompany==="none"){
+    html += '<div style="text-align:center;padding:60px 0;color:#94a3b8;">';
+    html += '<div style="font-size:48px;margin-bottom:16px;">🚢</div>';
+    html += '<div style="font-size:16px;font-weight:600;color:#64748b;margin-bottom:8px;">Select a company to view vessels</div>';
+    html += '<div style="font-size:13px;">Choose a company from the dropdown above</div></div>';
+  } else {
+    companyList.forEach(function(company){
+      const companyVessels = vessels.filter(v=>v.companyId===company.id);
+      if(companyVessels.length===0) return;
+      const isExpanded = vesselExpandedCompanies.has(company.id);
+      const arrow = isExpanded ? "▲" : "▼";
+      const onboardCount = onboardCrew.filter(c=>companyVessels.find(v=>v.id===c.vesselId)).length;
+      const borderR = isExpanded ? "10px 10px 0 0" : "10px";
+
+      html += '<div style="margin-bottom:10px;">';
+      var divStyle = "display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:"+borderR+";cursor:pointer;";
+      html += '<div onclick="toggleVesselCompany('+company.id+')" style="'+divStyle+'">';
+      html += '<div style="display:flex;align-items:center;gap:10px;">';
+      html += '<div style="width:4px;height:22px;background:#2563eb;border-radius:2px;"></div>';
+      html += '<span style="font-size:15px;font-weight:700;color:#0f172a;">'+company.name+'</span>';
+      html += '<span class="badge badge-blue">'+companyVessels.length+' vessels</span>';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:16px;">';
+      html += '<span style="font-size:12px;color:#16a34a;font-weight:600;">'+onboardCount+' onboard</span>';
+      html += '<span style="color:#94a3b8;font-size:14px;">'+arrow+'</span>';
+      html += '</div></div>';
+
+      if(isExpanded){
+        html += '<div class="card" style="padding:0;overflow:hidden;border-radius:0 0 10px 10px;border-top:none;">';
+        html += '<table><thead><tr>';
+        html += '<th>Vessel Name</th><th>IMO</th><th>Type</th><th>Flag</th><th>GRT</th><th>Crew Onboard</th><th>Status</th><th></th>';
+        html += '</tr></thead><tbody>';
+        companyVessels.forEach(function(v){
+          const onboard = onboardCrew.filter(c=>c.vesselId===v.id).length;
+          html += '<tr class="row-hover" style="cursor:pointer;" onclick="openVesselPanel('+v.id+')">';
+          html += '<td style="font-weight:600;color:#0f172a;">'+v.name+'</td>';
+          html += '<td class="mono" style="font-size:12px;color:#64748b;">'+(v.imo||"—")+'</td>';
+          html += '<td>'+(v.type||"—")+'</td>';
+          html += '<td>'+(v.flag||"—")+'</td>';
+          html += '<td class="mono" style="font-size:12px;">'+(v.grt?v.grt.toLocaleString():"—")+'</td>';
+          html += '<td><span class="badge badge-blue">'+onboard+' crew</span></td>';
+          html += '<td>'+statusBadge(v.status)+'</td>';
+          html += '<td onclick="event.stopPropagation()"><button class="btn-ghost-sm" onclick="openEditVesselModal('+v.id+')">Edit</button></td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+      html += '</div>';
+    });
+  }
+
+  html += '</div>';
+  document.getElementById("tab-vessels").innerHTML = html;
+}
+
+function openVesselPanel(id){
+  const v=vessels.find(x=>x.id===id);const owner=getCompany(v.companyId);const myCrew=crew.filter(c=>c.vesselId===id);
+  document.getElementById("panel-name").textContent=v.name;document.getElementById("panel-sub").textContent=`${v.type} · IMO: ${v.imo}`;
+  document.getElementById("panel-content").innerHTML=`
+    <div class="section-title">Vessel Info</div>
+    ${[["IMO",v.imo],["Type",v.type],["Flag",v.flag],["GRT",v.grt.toLocaleString()+" tons"],["Company",owner?owner.name:"—"]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:12px;color:#94a3b8;font-weight:500;">${k}</span><span style="font-size:13px;color:#0f172a;font-weight:500;">${val}</span></div>`).join("")}
+    <div style="margin-top:20px;" class="section-title">Crew (${myCrew.length})</div>
+    ${myCrew.length===0?`<p style="color:#94a3b8;font-size:13px;">No crew assigned</p>`:myCrew.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;">${natTag(c.nationality)}<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#0f172a;">${c.name}</div><div style="font-size:11px;color:#94a3b8;">${c.rank} · Joined: ${c.joinDate}</div></div>${statusBadge(c.status)}</div>`).join("")}`;
+  document.getElementById("side-panel-overlay").classList.remove("hidden");
+}
+
+function vForm(v){return`
+  <div class="grid2" style="margin-bottom:16px;">
+    <div><div class="form-label">Vessel Name</div><input class="input-field" id="v-name" value="${v?v.name:""}"></div>
+    <div><div class="form-label">IMO Number</div><input class="input-field" id="v-imo" value="${v?v.imo:""}"></div>
+    <div><div class="form-label">Type</div><select class="input-field" id="v-type">${VESSEL_TYPES.map(t=>`<option ${v&&t===v.type?"selected":""}>${t}</option>`).join("")}</select></div>
+    <div><div class="form-label">Flag</div><input class="input-field" id="v-flag" value="${v?v.flag:"Panama"}"></div>
+    <div><div class="form-label">GRT (tons)</div><input class="input-field" id="v-grt" type="number" value="${v?v.grt:""}"></div>
+    <div><div class="form-label">Company</div><select class="input-field" id="v-owner">${companys.map(s=>`<option value="${s.id}" ${v&&s.id===v.companyId?"selected":""}>${s.name}</option>`).join("")}</select></div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="${v?`updateVessel(${v.id})`:"saveVessel()"}">${v?"Update":"Save"}</button></div>`;}
+
+function openAddVesselModal(){document.getElementById("modal-title").textContent="Add Vessel";document.getElementById("modal-content").innerHTML=vForm(null);document.getElementById("modal-overlay").classList.remove("hidden");}
+function openEditVesselModal(id){const v=vessels.find(x=>x.id===id);document.getElementById("modal-title").textContent="Edit Vessel";document.getElementById("modal-content").innerHTML=vForm(v);document.getElementById("modal-overlay").classList.remove("hidden");}
+function saveVessel(){vessels.push({id:nextId(vessels),name:document.getElementById("v-name").value,imo:document.getElementById("v-imo").value,type:document.getElementById("v-type").value,flag:document.getElementById("v-flag").value,grt:parseInt(document.getElementById("v-grt").value)||0,companyId:parseInt(document.getElementById("v-owner").value),status:"active"});closeModal();renderVessels();renderDashboard();}
+function updateVessel(id){const idx=vessels.findIndex(x=>x.id===id);vessels[idx]={...vessels[idx],name:document.getElementById("v-name").value,imo:document.getElementById("v-imo").value,type:document.getElementById("v-type").value,flag:document.getElementById("v-flag").value,grt:parseInt(document.getElementById("v-grt").value)||0,companyId:parseInt(document.getElementById("v-owner").value)};closeModal();renderVessels();renderDashboard();}
+
+let crewSearch="",crewFilterCompany="all",crewFilterVessel="all",crewFilterNat="all",crewFilterStatus="all";
+function renderCrew(){
+  const vesselsByCompany = crewFilterCompany==="all" ? vessels : vessels.filter(v=>v.companyId===parseInt(crewFilterCompany));
+  const fc=crew.filter(c=>{
+    const v=getVessel(c.vesselId);
+    const ms=!crewSearch||c.name.toLowerCase().includes(crewSearch.toLowerCase())||c.crewNo.toLowerCase().includes(crewSearch.toLowerCase())||(v&&v.name.toLowerCase().includes(crewSearch.toLowerCase()));
+    const mc=crewFilterCompany==="all"||vesselsByCompany.find(vv=>vv.id===c.vesselId);
+    const mv=crewFilterVessel==="all"||c.vesselId===parseInt(crewFilterVessel);
+    const mn=crewFilterNat==="all"||c.nationality===crewFilterNat;
+    const mst=crewFilterStatus==="all"||c.status===crewFilterStatus;
+    return ms&&mc&&mv&&mn&&mst;
+  });
+  const vesselOptions=crewFilterCompany==="all"?vessels:vessels.filter(v=>v.companyId===parseInt(crewFilterCompany));
+  document.getElementById("tab-crew").innerHTML=`
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+        <div><h1 class="page-title">Crew</h1><p class="page-sub">${fc.length} of ${crew.length} members shown</p></div>
+        <button class="btn-primary" onclick="openAddCrewModal()">+ Add Crew</button>
+      </div>
+      <div class="filters">
+        <input class="input-field" style="width:200px;" placeholder="Search name, crew no..." value="${crewSearch}" oninput="crewSearch=this.value;renderCrew()">
+        <select class="input-field" style="width:180px;" onchange="crewFilterCompany=this.value;crewFilterVessel='all';renderCrew()">
+          <option value="all">All Companies</option>
+          ${companys.map(s=>`<option value="${s.id}" ${crewFilterCompany==s.id?"selected":""}>${s.name}</option>`).join("")}
+        </select>
+        <select class="input-field" style="width:170px;" onchange="crewFilterVessel=this.value;renderCrew()">
+          <option value="all">All Vessels</option>
+          ${vesselOptions.map(v=>`<option value="${v.id}" ${crewFilterVessel==v.id?"selected":""}>${v.name}</option>`).join("")}
+        </select>
+        <select class="input-field" style="width:155px;" onchange="crewFilterNat=this.value;renderCrew()">
+          <option value="all">All Nationalities</option>
+          <option value="Myanmar" ${crewFilterNat==="Myanmar"?"selected":""}>Myanmar</option>
+          <option value="Indonesia" ${crewFilterNat==="Indonesia"?"selected":""}>Indonesia</option><option value="Korea" ${crewFilterNat==="Korea"?"selected":""}>Korea</option>
+        </select>
+        <select class="input-field" style="width:120px;" onchange="crewFilterStatus=this.value;renderCrew()">
+          <option value="all">All Status</option>
+          <option value="onboard" ${crewFilterStatus==="onboard"?"selected":""}>Onboard</option>
+          <option value="leave" ${crewFilterStatus==="leave"?"selected":""}>On Leave</option>
+        </select>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Crew No</th><th>Name</th><th>Nat</th><th>Rank</th><th>Vessel</th><th>Status</th><th>Join Date</th><th>Sign Off</th><th>Passport Exp</th><th></th></tr></thead>
+        <tbody>${fc.map(c=>{const v=getVessel(c.vesselId);const pd=daysUntil(c.passportExpiry);return`<tr class="row-hover" style="cursor:pointer;" onclick="openCrewPanel(${c.id},'detail')">
+          <td class="mono" style="color:#2563eb;font-size:12px;">${c.crewNo}</td>
+          <td style="font-weight:600;color:#0f172a;">${c.name}</td>
+          <td>${natTag(c.nationality)}</td>
+          <td>${c.rank}</td>
+          <td style="color:#64748b;font-size:12px;">${v?v.name:"—"}</td>
+          <td>${statusBadge(c.status)}</td>
+          <td class="mono" style="font-size:12px;color:#64748b;">${c.joinDate}</td>
+          <td class="mono" style="font-size:12px;color:#64748b;">${c.signOffDate}</td>
+          <td><span class="${pd<0?"badge badge-red":pd<90?"badge badge-yellow":"badge badge-green"}">${c.passportExpiry}</span></td>
+          <td onclick="event.stopPropagation()"><div style="display:flex;gap:5px;"><button class="btn-ghost-sm" onclick="openCrewPanel(${c.id},'cert')">Certs</button><button class="btn-ghost-sm" onclick="openEditCrewModal(${c.id})">Edit</button></div></td></tr>`;}).join("")}
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+function openCrewPanel(id,panel){
+  const c=crew.find(x=>x.id===id);const v=getVessel(c.vesselId);const owner=v?getCompany(v.companyId):null;
+  document.getElementById("panel-name").textContent=c.name;
+  document.getElementById("panel-sub").textContent=`${c.crewNo} · ${c.rank}`;
+  let html="";
+  if(panel==="detail"){
+    html=`<div class="section-title">Personal Info</div>
+      ${[["Nationality",c.nationality],["Date of Birth",c.birthDate],["Passport No",c.passportNo],["Passport Expiry",c.passportExpiry],["Seaman Book",c.seamanBook],["Address",c.address||"—"],["Emergency Contact",c.emergencyContact||"—"]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;gap:12px;"><span style="font-size:12px;color:#94a3b8;font-weight:500;white-space:nowrap;">${k}</span><span style="font-size:13px;color:#0f172a;font-weight:500;text-align:right;">${val}</span></div>`).join("")}
+      <div style="margin-top:20px;" class="section-title">Vessel Assignment</div>
+      ${[["Vessel",v?v.name:"—"],["Company",owner?owner.name:"—"],["Status",c.status==="onboard"?"Onboard":"On Leave"],["Join Date",c.joinDate],["Sign Off",c.signOffDate]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f1f5f9;"><span style="font-size:12px;color:#94a3b8;font-weight:500;">${k}</span><span style="font-size:13px;color:#0f172a;font-weight:500;">${val}</span></div>`).join("")}`;
+  } else {
+    const myCerts=certs.filter(x=>x.crewId===id);
+    html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div class="section-title" style="margin-bottom:0;">Certificates (${myCerts.length})</div><button class="btn-ghost-sm" onclick="openAddCertModal(${id})">+ Add</button></div>
+      ${myCerts.length===0?`<p style="color:#94a3b8;font-size:13px;">No certificates registered</p>`:myCerts.map(cert=>`<div style="padding:12px;background:#f8fafc;border-radius:8px;margin-bottom:8px;border:1px solid #e2e8f0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:13px;font-weight:600;color:#0f172a;">${cert.type}</span>${certBadge(cert.expiryDate)}</div>
+        <div class="mono" style="font-size:11px;color:#64748b;">${cert.certNo}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Issued by: ${cert.issuedBy}</div>
+        <div style="font-size:11px;color:#94a3b8;">Expiry: ${cert.expiryDate}</div></div>`).join("")}`;
+  }
+  document.getElementById("panel-content").innerHTML=html;
+  document.getElementById("side-panel-overlay").classList.remove("hidden");
+}
+
+function cForm(c){return`
+  <div class="section-title">Personal Info</div>
+  <div class="grid2" style="margin-bottom:16px;">
+    <div><div class="form-label">Full Name</div><input class="input-field" id="c-name" value="${c?c.name:""}"></div>
+    <div><div class="form-label">Nationality</div><select class="input-field" id="c-nat"><option value="Myanmar" ${c&&c.nationality==="Myanmar"?"selected":""}>Myanmar</option><option value="Indonesia" ${c&&c.nationality==="Indonesia"?"selected":""}>Indonesia</option><option value="Korea" ${c&&c.nationality==="Korea"?"selected":""}>Korea</option></select></div>
+    <div><div class="form-label">Date of Birth</div><input class="input-field" id="c-birth" type="date" value="${c?c.birthDate:""}"></div>
+    <div><div class="form-label">Passport No</div><input class="input-field" id="c-passport" value="${c?c.passportNo:""}"></div>
+    <div><div class="form-label">Passport Expiry</div><input class="input-field" id="c-passexp" type="date" value="${c?c.passportExpiry:""}"></div>
+    <div><div class="form-label">Seaman Book</div><input class="input-field" id="c-seaman" value="${c?c.seamanBook:""}"></div>
+    <div><div class="form-label">Emergency Contact</div><input class="input-field" id="c-emergency" value="${c?c.emergencyContact||"":""}"></div>
+    <div><div class="form-label">Address</div><input class="input-field" id="c-address" value="${c?c.address||"":""}"></div>
+  </div>
+  <div class="section-title">Vessel Assignment</div>
+  <div class="grid2" style="margin-bottom:16px;">
+    <div><div class="form-label">Rank</div><select class="input-field" id="c-rank"><option value="">Select...</option>${RANKS.map(r=>`<option ${c&&r===c.rank?"selected":""}>${r}</option>`).join("")}</select></div>
+    <div><div class="form-label">Vessel</div><select class="input-field" id="c-vessel"><option value="">Select...</option>${vessels.map(v=>`<option value="${v.id}" ${c&&v.id===c.vesselId?"selected":""}>${v.name}</option>`).join("")}</select></div>
+    <div><div class="form-label">Status</div><select class="input-field" id="c-status"><option value="onboard" ${c&&c.status==="onboard"?"selected":""}>Onboard</option><option value="leave" ${c&&c.status==="leave"?"selected":""}>On Leave</option></select></div>
+    <div></div>
+    <div><div class="form-label">Join Date</div><input class="input-field" id="c-join" type="date" value="${c?c.joinDate:""}"></div>
+    <div><div class="form-label">Sign Off Date</div><input class="input-field" id="c-signoff" type="date" value="${c?c.signOffDate:""}"></div>
+  </div>
+  <div class="section-title">Salary (USD)</div>
+  <div class="grid2" style="margin-bottom:20px;">
+    <div><div class="form-label">Base Salary</div><input class="input-field" id="c-base" type="number" value="${c?c.baseSalary:0}"></div>
+    <div><div class="form-label">OT Rate/hr</div><input class="input-field" id="c-ot" type="number" value="${c?c.overtimeRate:0}"></div>
+    <div><div class="form-label">Allowances</div><input class="input-field" id="c-allow" type="number" value="${c?c.allowances:0}"></div>
+    <div><div class="form-label">Deductions</div><input class="input-field" id="c-deduct" type="number" value="${c?c.deductions:0}"></div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="${c?`updateCrew(${c.id})`:"saveCrew()"}">${c?"Update":"Save"}</button></div>`;}
+
+function openAddCrewModal(){document.getElementById("modal-title").textContent="Add Crew Member";document.getElementById("modal-content").innerHTML=cForm(null);document.getElementById("modal-overlay").classList.remove("hidden");}
+function openEditCrewModal(id){const c=crew.find(x=>x.id===id);document.getElementById("modal-title").textContent="Edit Crew Member";document.getElementById("modal-content").innerHTML=cForm(c);document.getElementById("modal-overlay").classList.remove("hidden");}
+function getCrewFields(){return{name:document.getElementById("c-name").value,nationality:document.getElementById("c-nat").value,rank:document.getElementById("c-rank").value,vesselId:parseInt(document.getElementById("c-vessel").value)||null,status:document.getElementById("c-status").value,birthDate:document.getElementById("c-birth").value,passportNo:document.getElementById("c-passport").value,passportExpiry:document.getElementById("c-passexp").value,seamanBook:document.getElementById("c-seaman").value,joinDate:document.getElementById("c-join").value,signOffDate:document.getElementById("c-signoff").value,emergencyContact:document.getElementById("c-emergency").value,address:document.getElementById("c-address").value,baseSalary:parseFloat(document.getElementById("c-base").value)||0,overtimeRate:parseFloat(document.getElementById("c-ot").value)||0,allowances:parseFloat(document.getElementById("c-allow").value)||0,deductions:parseFloat(document.getElementById("c-deduct").value)||0};}
+function saveCrew(){const f=getCrewFields();const prefix=f.nationality==="Myanmar"?"MM":"ID";const count=String(crew.filter(c=>c.nationality===f.nationality).length+1).padStart(4,"0");crew.push({id:nextId(crew),crewNo:`${prefix}-${count}`,...f});closeModal();renderCrew();renderDashboard();}
+function updateCrew(id){const idx=crew.findIndex(x=>x.id===id);crew[idx]={...crew[idx],...getCrewFields()};closeModal();renderCrew();renderDashboard();}
+
+let certFilterCompany="all", certFilterVessel="all", certFilterCrew="all";
+function renderCertificates(){
+  // 필터된 선원 ID 목록 계산
+  let filteredCrewIds = crew.map(c=>c.id);
+  if(certFilterCompany!=="all"){
+    const companyVessels=vessels.filter(v=>v.companyId===parseInt(certFilterCompany)).map(v=>v.id);
+    filteredCrewIds=crew.filter(c=>companyVessels.includes(c.vesselId)).map(c=>c.id);
+  }
+  if(certFilterVessel!=="all"){
+    filteredCrewIds=filteredCrewIds.filter(id=>{const c=crew.find(x=>x.id===id);return c&&c.vesselId===parseInt(certFilterVessel);});
+  }
+  if(certFilterCrew!=="all"){
+    filteredCrewIds=filteredCrewIds.filter(id=>id===parseInt(certFilterCrew));
+  }
+
+  const filteredCerts=certs.filter(c=>filteredCrewIds.includes(c.crewId));
+  const valid=filteredCerts.filter(c=>certStatus(c.expiryDate)==="valid").length;
+  const expiring=filteredCerts.filter(c=>certStatus(c.expiryDate)==="expiring").length;
+  const expired=filteredCerts.filter(c=>certStatus(c.expiryDate)==="expired").length;
+
+  // 선박 필터 옵션 (선사 선택 시 해당 선사 선박만)
+  const vesselOptions = certFilterCompany==="all" ? vessels : vessels.filter(v=>v.companyId===parseInt(certFilterCompany));
+  // 선원 필터 옵션 (선박 선택 시 해당 선박 선원만)
+  const crewOptions = certFilterVessel==="all"
+    ? (certFilterCompany==="all" ? crew : crew.filter(c=>vesselOptions.map(v=>v.id).includes(c.vesselId)))
+    : crew.filter(c=>c.vesselId===parseInt(certFilterVessel));
+
+  document.getElementById("tab-certificates").innerHTML=`
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+        <div><h1 class="page-title">Certificates</h1><p class="page-sub">STCW, CoC, and other certificates</p></div>
+        <button class="btn-primary" onclick="openAddCertModalGlobal()">+ Add Certificate</button>
+      </div>
+      <div class="stat-grid">
+        ${[["Total",filteredCerts.length,"#2563eb","#dbeafe"],["Valid",valid,"#16a34a","#dcfce7"],["Expiring Soon",expiring,"#ca8a04","#fef9c3"],["Expired",expired,"#dc2626","#fee2e2"]].map(([l,v,color,bg])=>`<div class="stat-card" style="min-width:130px;"><div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${l}</div><div style="font-size:28px;font-weight:700;color:${color};font-family:'IBM Plex Mono',monospace;">${v}</div></div>`).join("")}
+      </div>
+      <div class="filters">
+        <select class="input-field" style="width:200px;" onchange="certFilterCompany=this.value;certFilterVessel='all';certFilterCrew='all';renderCertificates()">
+          <option value="all">All Companies</option>
+          ${companys.map(s=>`<option value="${s.id}" ${certFilterCompany==s.id?"selected":""}>${s.name}</option>`).join("")}
+        </select>
+        <select class="input-field" style="width:180px;" onchange="certFilterVessel=this.value;certFilterCrew='all';renderCertificates()">
+          <option value="all">All Vessels</option>
+          ${vesselOptions.map(v=>`<option value="${v.id}" ${certFilterVessel==v.id?"selected":""}>${v.name}</option>`).join("")}
+        </select>
+        <select class="input-field" style="width:180px;" onchange="certFilterCrew=this.value;renderCertificates()">
+          <option value="all">All Crew</option>
+          ${crewOptions.map(c=>`<option value="${c.id}" ${certFilterCrew==c.id?"selected":""}>${c.name} (${c.rank})</option>`).join("")}
+        </select>
+        ${certFilterCompany!=="all"||certFilterVessel!=="all"||certFilterCrew!=="all"?`<button class="btn-ghost" onclick="certFilterCompany='all';certFilterVessel='all';certFilterCrew='all';renderCertificates()">✕ Clear</button>`:""}
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table><thead><tr><th>Crew Member</th><th>Rank</th><th>Vessel</th><th>Certificate Type</th><th>Cert No</th><th>Issue Date</th><th>Expiry Date</th><th>D-Day</th><th>Issued By</th><th>Status</th></tr></thead>
+        <tbody>${filteredCerts.length===0?`<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:30px;">No certificates found</td></tr>`:
+          filteredCerts.map(cert=>{
+            const owner=crew.find(c=>c.id===cert.crewId);
+            const v=owner?getVessel(owner.vesselId):null;
+            const d=daysUntil(cert.expiryDate);
+            return`<tr class="row-hover">
+              <td style="font-weight:600;color:#2563eb;cursor:pointer;text-decoration:underline;" onclick="openCrewPanel(${owner?.id},'cert')">${owner?.name||"—"}</td>
+              <td style="color:#64748b;font-size:12px;">${owner?.rank||"—"}</td>
+              <td style="color:#64748b;font-size:12px;">${v?v.name:"—"}</td>
+              <td>${cert.type}</td>
+              <td class="mono" style="color:#2563eb;font-size:12px;">${cert.certNo}</td>
+              <td class="mono" style="font-size:12px;color:#64748b;">${cert.issueDate}</td>
+              <td class="mono" style="font-size:12px;color:#64748b;">${cert.expiryDate}</td>
+              <td style="font-weight:600;font-size:12px;color:${d<0?"#dc2626":d<90?"#ca8a04":"#94a3b8"};font-family:'IBM Plex Mono',monospace;">${d<0?Math.abs(d)+"d ago":"D-"+d}</td>
+              <td style="font-size:12px;color:#64748b;">${cert.issuedBy}</td>
+              <td>${certBadge(cert.expiryDate)}</td></tr>`;
+          }).join("")}
+        </tbody></table>
+      </div>
+    </div>`;
+}
+
+function certForm(crewId){return`
+  ${crewId?`<div style="background:#f8fafc;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#374151;">Adding for: <strong>${crew.find(x=>x.id===crewId)?.name}</strong></div>`:`<div style="margin-bottom:14px;"><div class="form-label">Crew Member</div><select class="input-field" id="cert-crew">${crew.map(c=>`<option value="${c.id}">${c.name} (${c.rank})</option>`).join("")}</select></div>`}
+  <div class="grid2" style="margin-bottom:16px;">
+    <div style="grid-column:1/-1;"><div class="form-label">Certificate Type</div><select class="input-field" id="cert-type">${CERT_TYPES.map(t=>`<option>${t}</option>`).join("")}</select></div>
+    <div><div class="form-label">Certificate No</div><input class="input-field" id="cert-no"></div>
+    <div><div class="form-label">Issued By</div><input class="input-field" id="cert-by"></div>
+    <div><div class="form-label">Issue Date</div><input class="input-field" id="cert-issue" type="date"></div>
+    <div><div class="form-label">Expiry Date</div><input class="input-field" id="cert-expiry" type="date"></div>
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;"><button class="btn-ghost" onclick="closeModal()">Cancel</button><button class="btn-primary" onclick="saveCert(${crewId||null})">Save</button></div>`;}
+
+function openAddCertModal(crewId){document.getElementById("modal-title").textContent="Add Certificate";document.getElementById("modal-content").innerHTML=certForm(crewId);document.getElementById("modal-overlay").classList.remove("hidden");}
+function openAddCertModalGlobal(){document.getElementById("modal-title").textContent="Add Certificate";document.getElementById("modal-content").innerHTML=certForm(null);document.getElementById("modal-overlay").classList.remove("hidden");}
+function saveCert(crewId){const cid=crewId||parseInt(document.getElementById("cert-crew").value);certs.push({id:nextId(certs),crewId:cid,type:document.getElementById("cert-type").value,certNo:document.getElementById("cert-no").value,issueDate:document.getElementById("cert-issue").value,expiryDate:document.getElementById("cert-expiry").value,issuedBy:document.getElementById("cert-by").value});closeModal();if(crewId)openCrewPanel(crewId,"cert");renderCertificates();renderDashboard();}
+
+let csFilterCompany="all";
+let csExpandedCompanies = new Set();
+
+function toggleCompany(id){
+  if(csExpandedCompanies.has(id)) csExpandedCompanies.delete(id);
+  else csExpandedCompanies.add(id);
+  renderCrewStatus();
+}
+
+function editCell(vesselId, rank, event){
+  event.stopPropagation();
+  const vid = String(vesselId);
+  const stats = (vesselStats[vid]&&vesselStats[vid][rank]) || {};
+  const mm = stats.MM||0, id = stats.ID||0, kr = stats.KR||0;
+
+  // 기존 편집창 닫기
+  const existing = document.getElementById('cell-editor');
+  if(existing) existing.remove();
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const editor = document.createElement('div');
+  editor.id = 'cell-editor';
+  editor.style.cssText = 'position:fixed;top:'+(rect.bottom+4)+'px;left:'+(rect.left-10)+'px;background:#fff;border:1px solid #2563eb;border-radius:10px;padding:14px 16px;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.15);min-width:180px;';
+  editor.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">${rank}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:600;color:#1d4ed8;width:24px;">MM</span>
+        <input id="ce-mm" type="number" min="0" value="${mm}" style="width:60px;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:13px;font-weight:600;color:#1d4ed8;text-align:center;outline:none;">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:600;color:#7e22ce;width:24px;">ID</span>
+        <input id="ce-id" type="number" min="0" value="${id}" style="width:60px;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:13px;font-weight:600;color:#7e22ce;text-align:center;outline:none;">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:600;color:#16a34a;width:24px;">KR</span>
+        <input id="ce-kr" type="number" min="0" value="${kr}" style="width:60px;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:13px;font-weight:600;color:#16a34a;text-align:center;outline:none;">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:12px;">
+      <button onclick="saveCellEdit(${vesselId},'${rank}')" style="flex:1;background:#2563eb;color:#fff;border:none;padding:6px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Save</button>
+      <button onclick="document.getElementById('cell-editor').remove()" style="flex:1;background:#f1f5f9;color:#64748b;border:none;padding:6px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(editor);
+  document.getElementById('ce-mm').focus();
+  document.getElementById('ce-mm').select();
+
+  // 바깥 클릭 시 닫기
+  setTimeout(()=>{
+    document.addEventListener('click', function handler(e){
+      if(!editor.contains(e.target)){
+        editor.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 100);
+}
+
+function saveCellEdit(vesselId, rank){
+  const mm = parseInt(document.getElementById('ce-mm').value)||0;
+  const id = parseInt(document.getElementById('ce-id').value)||0;
+  const kr = parseInt(document.getElementById('ce-kr').value)||0;
+  saveVesselStat(vesselId, rank, 'MM', mm);
+  saveVesselStat(vesselId, rank, 'ID', id);
+  saveVesselStat(vesselId, rank, 'KR', kr);
+  document.getElementById('cell-editor').remove();
+  renderCrewStatus();
+  renderDashboard();
+}
+
+function renderCrewStatus(){
+  const filteredVessels = csFilterCompany==="all" ? vessels : vessels.filter(v=>v.companyId===parseInt(csFilterCompany));
+  const usedRanks = RANKS.filter(r=>Object.values(vesselStats).some(s=>s[r]));
+  const companyList = csFilterCompany==="all"
+    ? [...companys].sort((a,b)=>{
+        if(a.name==="Coastal") return 1;
+        if(b.name==="Coastal") return -1;
+        return getCompanyOnboard(b.id)-getCompanyOnboard(a.id);
+      })
+    : companys.filter(c=>c.id===parseInt(csFilterCompany));
+
+  if(csFilterCompany!=="all") csExpandedCompanies.add(parseInt(csFilterCompany));
+
+  const totalOnboard = filteredVessels.reduce((s,v)=>s+getVesselTotal(String(v.id)),0);
+
+  let html = '<div>';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">';
+  html += '<div><h1 class="page-title">Crew Status</h1><p class="page-sub">Onboard crew by vessel &amp; rank — click any cell to edit</p></div>';
+  html += '</div>';
+
+  html += '<div class="filters" style="margin-bottom:20px;">';
+  html += '<select class="input-field" style="width:200px;" onchange="csFilterCompany=this.value;renderCrewStatus()">';
+  html += '<option value="all">All Companies</option>';
+  companys.forEach(s=>{ html += '<option value="'+s.id+'"'+(csFilterCompany==s.id?' selected':'')+'>'+s.name+'</option>'; });
+  html += '</select>';
+  html += '<div style="font-size:13px;color:#64748b;margin-left:8px;">Total onboard: <strong style="color:#16a34a;">'+totalOnboard+' crew</strong> across <strong style="color:#2563eb;">'+filteredVessels.length+' vessels</strong></div>';
+  html += '<button class="btn-ghost" style="margin-left:auto;font-size:12px;" onclick="csExpandedCompanies=new Set(['+companyList.map(c=>c.id).join(',')+']);renderCrewStatus()">Expand All</button>';
+  html += '<button class="btn-ghost" style="font-size:12px;" onclick="csExpandedCompanies=new Set();renderCrewStatus()">Collapse All</button>';
+  html += '</div>';
+
+  companyList.forEach(function(company){
+    const companyVessels = filteredVessels.filter(v=>v.companyId===company.id);
+    if(companyVessels.length===0) return;
+    const companyMM = getCompanyNat(company.id,"MM");
+    const companyID = getCompanyNat(company.id,"ID");
+    const companyKR = getCompanyNat(company.id,"KR");
+    const companyTotal = getCompanyOnboard(company.id);
+    const isExpanded = csExpandedCompanies.has(company.id);
+    const arrow = isExpanded ? "▲" : "▼";
+    const borderR = isExpanded ? "10px 10px 0 0" : "10px";
+
+    html += '<div style="margin-bottom:10px;">';
+    var divStyle = "display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:"+borderR+";cursor:pointer;";
+    html += '<div onclick="toggleCompany('+company.id+')" style="'+divStyle+'">';
+    html += '<div style="display:flex;align-items:center;gap:10px;">';
+    html += '<div style="width:4px;height:22px;background:#2563eb;border-radius:2px;"></div>';
+    html += '<span style="font-size:15px;font-weight:700;color:#0f172a;">'+company.name+'</span>';
+    html += '<span class="badge badge-blue">'+companyVessels.length+' vessels</span>';
+    if(company.idAgent) html += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:'+(company.idAgent==="BJM"?"#fef3c7":"#ede9fe")+';color:'+(company.idAgent==="BJM"?"#92400e":"#6d28d9")+';">'+company.idAgent+'</span>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:16px;">';
+    html += '<div style="display:flex;gap:12px;font-size:12px;">';
+    if(companyMM>0) html += '<span style="color:#1d4ed8;font-weight:600;">MM: '+companyMM+'</span>';
+    if(companyID>0) html += '<span style="color:#7e22ce;font-weight:600;">ID: '+companyID+'</span>';
+    if(companyKR>0) html += '<span style="color:#16a34a;font-weight:600;">KR: '+companyKR+'</span>';
+    html += '<span style="color:#0f172a;font-weight:700;font-size:13px;">Total: '+companyTotal+'</span>';
+    html += '</div>';
+    html += '<span style="color:#94a3b8;font-size:14px;">'+arrow+'</span>';
+    html += '</div></div>';
+
+    if(isExpanded){
+      html += '<div class="card" style="padding:0;overflow-x:auto;border-radius:0 0 10px 10px;border-top:none;">';
+      html += '<table style="min-width:max-content;"><thead><tr style="background:#f8fafc;">';
+      html += '<th style="min-width:180px;position:sticky;left:0;background:#f8fafc;z-index:1;">Vessel</th>';
+      usedRanks.forEach(r=>{ html += '<th style="text-align:center;min-width:56px;cursor:pointer;">'+r+'</th>'; });
+      html += '<th style="text-align:center;min-width:60px;background:#eff6ff;color:#1d4ed8;">MM</th>';
+      html += '<th style="text-align:center;min-width:60px;background:#faf5ff;color:#7e22ce;">ID</th>';
+      if(company.idAgent==="BJM") html += '<th style="text-align:center;min-width:52px;background:#fef9c3;color:#92400e;">BJM</th>';
+      if(company.idAgent==="HGM") html += '<th style="text-align:center;min-width:52px;background:#ede9fe;color:#6d28d9;">HGM</th>';
+      html += '<th style="text-align:center;min-width:52px;background:#f0fdf4;color:#16a34a;">KR</th>';
+      html += '<th style="text-align:center;min-width:64px;background:#f8fafc;color:#0f172a;">Total</th>';
+      html += '</tr></thead><tbody>';
+
+      companyVessels.forEach(function(v){
+        const vid = String(v.id);
+        const vmm = getVesselNat(vid,"MM");
+        const vid_ = getVesselNat(vid,"ID");
+        const vkr = getVesselNat(vid,"KR");
+        const vtotal = vmm+vid_+vkr;
+        html += '<tr class="row-hover">';
+        html += '<td style="font-weight:600;color:#0f172a;position:sticky;left:0;background:#fff;z-index:1;">'+v.name+'</td>';
+        usedRanks.forEach(r=>{
+          const rmm = getVesselRankNat(vid,r,"MM");
+          const rid = getVesselRankNat(vid,r,"ID");
+          const rkr = getVesselRankNat(vid,r,"KR");
+          const cnt = rmm+rid+rkr;
+          var natParts = [];
+          if(rmm>0) natParts.push('<span style="color:#1d4ed8;">MM</span>');
+          if(rid>0) natParts.push('<span style="color:#7e22ce;">ID</span>');
+          if(rkr>0) natParts.push('<span style="color:#16a34a;">KR</span>');
+          var natStr = natParts.join('<span style="color:#cbd5e0;">·</span>');
+          var natCount = (rmm>0?1:0)+(rid>0?1:0)+(rkr>0?1:0);
+          var bg = cnt===0?"transparent": natCount>1?"#f1f5f9": rmm>0?"#dbeafe": rid>0?"#f3e8ff":"#dcfce7";
+          html += '<td style="text-align:center;padding:3px 2px;" onclick="editCell('+v.id+',\''+r+'\',event)" title="Click to edit">';
+          if(cnt>0){
+            html += '<div style="display:inline-flex;flex-direction:column;align-items:center;padding:3px 5px;border-radius:6px;background:'+bg+';cursor:pointer;border:1px solid transparent;" onmouseover="this.style.borderColor=\'#2563eb\'" onmouseout="this.style.borderColor=\'transparent\'">';
+            html += '<span style="font-weight:700;font-size:12px;color:#0f172a;">'+cnt+'</span>';
+            html += '<span style="font-size:9px;font-weight:600;white-space:nowrap;">'+natStr+'</span>';
+            html += '</div>';
+          } else {
+            html += '<div style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;border:1px dashed #e2e8f0;color:#cbd5e0;font-size:11px;" onmouseover="this.style.borderColor=\'#2563eb\';this.style.color=\'#2563eb\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.color=\'#cbd5e0\'">+</div>';
+          }
+          html += '</td>';
+        });
+        html += '<td style="text-align:center;background:#eff6ff;font-weight:700;color:#1d4ed8;font-family:monospace;">'+(vmm||"—")+'</td>';
+        html += '<td style="text-align:center;background:#faf5ff;font-weight:700;color:#7e22ce;font-family:monospace;">'+(vid_||"—")+'</td>';
+        if(company.idAgent==="BJM") html += '<td style="text-align:center;background:#fef9c3;font-weight:700;color:#92400e;font-family:monospace;">'+(vid_||"—")+'</td>';
+        if(company.idAgent==="HGM") html += '<td style="text-align:center;background:#ede9fe;font-weight:700;color:#6d28d9;font-family:monospace;">'+(vid_||"—")+'</td>';
+        html += '<td style="text-align:center;background:#f0fdf4;font-weight:700;color:#16a34a;font-family:monospace;">'+(vkr||"—")+'</td>';
+        html += '<td style="text-align:center;background:#f8fafc;font-weight:700;color:#0f172a;font-family:monospace;font-size:14px;">'+vtotal+'</td>';
+        html += '</tr>';
+      });
+
+      // Subtotal
+      const subMM=getCompanyNat(company.id,"MM");
+      const subID=getCompanyNat(company.id,"ID");
+      const subKR=getCompanyNat(company.id,"KR");
+      html += '<tr style="background:#f8fafc;border-top:2px solid #e2e8f0;">';
+      html += '<td style="font-weight:700;color:#0f172a;position:sticky;left:0;background:#f8fafc;font-size:12px;text-transform:uppercase;">Subtotal</td>';
+      usedRanks.forEach(r=>{
+        const vids=companyVessels.map(v=>String(v.id));
+        const cnt=vids.reduce((s,vid)=>s+getVesselRankNat(vid,r,"MM")+getVesselRankNat(vid,r,"ID")+getVesselRankNat(vid,r,"KR"),0);
+        html += '<td style="text-align:center;">'+(cnt>0?'<span style="font-weight:700;color:#374151;font-family:monospace;">'+cnt+'</span>':'<span style="color:#e2e8f0;">—</span>')+'</td>';
+      });
+      html += '<td style="text-align:center;background:#eff6ff;font-weight:700;color:#1d4ed8;font-family:monospace;">'+(subMM||"—")+'</td>';
+      html += '<td style="text-align:center;background:#faf5ff;font-weight:700;color:#7e22ce;font-family:monospace;">'+(subID||"—")+'</td>';
+      if(company.idAgent==="BJM") html += '<td style="text-align:center;background:#fef9c3;font-weight:700;color:#92400e;font-family:monospace;">'+(subID||"—")+'</td>';
+      if(company.idAgent==="HGM") html += '<td style="text-align:center;background:#ede9fe;font-weight:700;color:#6d28d9;font-family:monospace;">'+(subID||"—")+'</td>';
+      html += '<td style="text-align:center;background:#f0fdf4;font-weight:700;color:#16a34a;font-family:monospace;">'+(subKR||"—")+'</td>';
+      html += '<td style="text-align:center;background:#f8fafc;font-weight:700;color:#0f172a;font-family:monospace;font-size:15px;">'+companyTotal+'</td>';
+      html += '</tr></tbody></table></div>';
+    }
+    html += '</div>';
+  });
+
+  // Grand Total
+  if(csFilterCompany==="all"){
+    const grandMM=getAllNat("MM"), grandID=getAllNat("ID"), grandKR=getAllNat("KR");
+    const grandBJM=Object.entries(vesselStats).reduce((sum,[vid,s])=>{const v=vessels.find(vv=>String(vv.id)===vid);const co=v?companys.find(cc=>cc.id===v.companyId):null;return sum+(co&&co.idAgent==="BJM"?Object.values(s).reduce((ss,n)=>ss+(n.ID||0),0):0);},0);
+    const grandHGM=Object.entries(vesselStats).reduce((sum,[vid,s])=>{const v=vessels.find(vv=>String(vv.id)===vid);const co=v?companys.find(cc=>cc.id===v.companyId):null;return sum+(co&&co.idAgent==="HGM"?Object.values(s).reduce((ss,n)=>ss+(n.ID||0),0):0);},0);
+    html += '<div class="card" style="padding:0;overflow-x:auto;border:2px solid #2563eb;margin-top:10px;">';
+    html += '<div style="padding:12px 16px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;justify-content:space-between;align-items:center;">';
+    html += '<span style="font-size:13px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.06em;">Grand Total — All Companies</span>';
+    html += '<div style="display:flex;gap:16px;font-size:13px;">';
+    html += '<span style="color:#1d4ed8;font-weight:700;">MM: '+grandMM+'</span>';
+    html += '<span style="color:#7e22ce;font-weight:700;">ID: '+grandID+'</span>';
+    html += '<span style="color:#92400e;font-weight:700;">BJM: '+grandBJM+'</span>';
+    html += '<span style="color:#6d28d9;font-weight:700;">HGM: '+grandHGM+'</span>';
+    if(grandKR>0) html += '<span style="color:#16a34a;font-weight:700;">KR: '+grandKR+'</span>';
+    html += '<span style="color:#0f172a;font-weight:700;">Total: '+(grandMM+grandID+grandKR)+'</span>';
+    html += '</div></div>';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById("tab-crewstatus").innerHTML = html;
+}
+
+function openVesselCrewPanel(vesselId){
+  const v=vessels.find(x=>x.id===vesselId);
+  const owner=getCompany(v.companyId);
+  const onboardCrew=crew.filter(c=>c.vesselId===vesselId&&c.status==="onboard");
+  document.getElementById("panel-name").textContent=v.name;
+  document.getElementById("panel-sub").textContent=`${v.type} · ${owner?owner.name:"—"}`;
+  document.getElementById("panel-content").innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="section-title" style="margin-bottom:0;">Onboard Crew (${onboardCrew.length})</div>
+      <button class="btn-ghost-sm" onclick="closePanel();openAddCrewModal()">+ Add Crew</button>
+    </div>
+    ${onboardCrew.length===0?`<p style="color:#94a3b8;font-size:13px;">No crew onboard</p>`:
+      onboardCrew.map(c=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+          ${natTag(c.nationality)}
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#0f172a;">${c.name}</div>
+            <div style="font-size:11px;color:#94a3b8;">${c.rank} · Join: ${c.joinDate}</div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <button class="btn-ghost-sm" onclick="closePanel();openCrewPanel(${c.id},'detail')">View</button>
+            <button class="btn-ghost-sm" onclick="closePanel();openEditCrewModal(${c.id})">Edit</button>
+          </div>
+        </div>`).join("")}`;
+  document.getElementById("side-panel-overlay").classList.remove("hidden");
+}
+
+function closePanel(){document.getElementById("side-panel-overlay").classList.add("hidden");}
+function closeModal(){document.getElementById("modal-overlay").classList.add("hidden");}
+renderDashboard();
+</script>
+</body>
+</html>
